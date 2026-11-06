@@ -33,3 +33,10 @@
 .navbar .btn-primary { height:38px; padding-inline:18px; font-size:12px; }
 @media(max-width:767px) { .navbar .site-width { gap:8px; } .navbar .wordmark { font-size:16px; line-height:1.15; } .navbar a>img { width:34px;height:34px; } .navbar a { gap:7px; } .navbar .btn-primary { padding-inline:13px; height:36px; } .navbar .wordmark+span { font-size:7px; margin-top:4px; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important;transition:none !important;scroll-behavior:auto !important; } }
+
+/* Keep dense legacy sections readable and controls usable on touch screens. */
+input, select, textarea { font-size: 16px !important; }
+:focus-visible { outline: 3px solid var(--gold-deep); outline-offset: 3px; }
+summary { min-height: 28px; }
+.gallery-dot { min-width: 24px; min-height: 24px; }
+@media(max-width:400px) { .navbar .wordmark { font-size:14px; } .navbar .btn-primary { padding-inline:10px; } }
