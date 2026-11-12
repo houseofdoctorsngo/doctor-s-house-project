@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { assistanceSchema, donorSchema } from '../lib/ngo';
+import { assistanceSchema, donorSchema, normalizeIndianPhone } from '../lib/ngo';
 import { hashToken, limitedBody, sameOrigin, validSignature } from './security';
 
 class ApiError extends Error { constructor(public status: number, message: string) { super(message); } }
@@ -62,6 +62,10 @@ async function reconcile(row: DonationRow, payment: Payment) {
 function summary(row: DonationRow) {
   return { id: row.id, name: row.name, amount: row.amount_paise / 100, orderId: row.order_id, paymentId: row.payment_id, status: row.status, mode: row.mode, date: row.created_at, refunded: row.amount_refunded / 100 };
 }
+function requirePaymentMode(row: DonationRow) {
+  if (!env('RAZORPAY_KEY_ID') || !env('RAZORPAY_KEY_SECRET')) throw new ApiError(503, 'Payment checks are temporarily unavailable. Keep your reference and contact our team before paying again.');
+  if (!env('RAZORPAY_KEY_ID').startsWith(`rzp_${row.mode}_`)) throw new ApiError(409, 'This checkout belongs to a different payment environment. Contact our team with your reference.');
+}
 
 export async function handleApi(request: Request): Promise<Response | null> {
   const path = new URL(request.url).pathname;
@@ -93,13 +97,14 @@ export async function handleApi(request: Request): Promise<Response | null> {
       if (parsed.website) throw new ApiError(400, 'Unable to submit this request.');
       await checkHuman(parsed.humanToken, 'assistance');
       const { name, phone, village, assistance_type } = parsed;
-      const payload = { name, phone: phone.replace(/\s/g, '').replace(/^\+91/, ''), village, assistance_type };
+      const payload = { name, phone: normalizeIndianPhone(phone), village, assistance_type };
+      const matches = (saved: typeof payload) => saved.name === payload.name && normalizeIndianPhone(saved.phone) === payload.phone && saved.village === payload.village && saved.assistance_type === payload.assistance_type;
       const db = database();
       const existing = await db.from('assistance_requests').select('name,phone,village,assistance_type').eq('id', parsed.id).maybeSingle();
       if (existing.error) throw new ApiError(503, 'Requests are temporarily unavailable. Please call our helpline.');
       if (existing.data) {
         const saved = existing.data;
-        if ((Object.keys(payload) as Array<keyof typeof payload>).some(key => saved[key] !== payload[key])) throw new ApiError(409, 'Please start a new request.');
+        if (!matches(saved)) throw new ApiError(409, 'Please start a new request.');
         return json({ id: parsed.id });
       }
       const permit = randomUUID();
@@ -111,7 +116,12 @@ export async function handleApi(request: Request): Promise<Response | null> {
       // Also remove permits after a rejected insert; the trigger consumes successful ones.
       await db.from('submission_permits').delete().eq('id', permit);
       if (error) {
-        if (error.code === '23505') return json({ id: parsed.id });
+        if (error.code === '23505') {
+          const retry = await db.from('assistance_requests').select('name,phone,village,assistance_type').eq('id', parsed.id).maybeSingle();
+          if (retry.error || !retry.data) throw new ApiError(503, 'Confirmation is pending. Retry with the same details.');
+          if (!matches(retry.data)) throw new ApiError(409, 'Please start a new request.');
+          return json({ id: parsed.id });
+        }
         throw new ApiError(error.code === 'P0001' ? 429 : 503, 'Request could not be saved or too many requests were submitted. Please call +91 75688 96804.');
       }
       return json({ id: parsed.id }, 201);
@@ -127,6 +137,7 @@ export async function handleApi(request: Request): Promise<Response | null> {
       let row: DonationRow;
       if (existing) {
         row = await donationFor(parsed.id, parsed.token);
+        requirePaymentMode(row);
         if (row.amount_paise !== parsed.amount * 100 || row.email !== parsed.email || row.name !== parsed.name || row.phone !== parsed.phone) throw new ApiError(409, 'A checkout already exists. Check its status before starting another donation.');
         if (!row.order_id) throw new ApiError(409, 'Order creation is pending. Contact our team with your reference; do not start another payment.');
       } else {
@@ -144,18 +155,27 @@ export async function handleApi(request: Request): Promise<Response | null> {
     if (path === '/api/payments/verify') {
       const parsed = accessSchema.extend({ paymentId: z.string().regex(/^pay_[A-Za-z0-9]+$/), signature: z.string().length(64) }).parse(body);
       const row = await donationFor(parsed.id, parsed.token);
+      requirePaymentMode(row);
       if (!row.order_id || !validSignature(`${row.order_id}|${parsed.paymentId}`, parsed.signature, env('RAZORPAY_KEY_SECRET'))) throw new ApiError(400, 'Payment verification failed. Contact our team if money was debited.');
       return json(summary(await reconcile(row, await gateway<Payment>(`payments/${parsed.paymentId}`))));
     }
     if (path === '/api/payments/status') {
       const parsed = accessSchema.parse(body);
       let row = await donationFor(parsed.id, parsed.token);
+      requirePaymentMode(row);
+      let awaitingCapture = false;
       if (row.order_id) {
         const payments = await gateway<{ items: Payment[] }>(`orders/${row.order_id}/payments`);
         const paid = payments.items.find(p => ['captured', 'refunded'].includes(p.status));
         if (paid) row = await reconcile(row, paid);
+        awaitingCapture = row.status === 'pending' && payments.items.some(p => p.status === 'authorized');
       }
-      return json(summary(row));
+      // Recover an order even when its original response never reached the browser.
+      // Never invite another payment while an existing attempt awaits capture.
+      const checkout = row.order_id && row.status === 'pending' && !awaitingCapture && formsReady() && mode() === row.mode
+        ? { orderId: row.order_id, keyId: env('RAZORPAY_KEY_ID'), amount: row.amount_paise, mode: row.mode }
+        : null;
+      return json({ ...summary(row), checkout, awaitingCapture });
     }
     return json({ error: 'Not found' }, 404);
   } catch (error) {

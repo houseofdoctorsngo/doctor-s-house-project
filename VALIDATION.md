@@ -1,4 +1,18 @@
-# Validation — 6 November 2026
+# Validation - updated 12 November 2026
+
+## Follow-up verification - 12 November
+
+- TypeScript passed again after the follow-up changes.
+- Full Vitest run: **43 tests passed across 8 files**, including the new assistance retry API tests and donation browser-component tests.
+- After adding the paused-donations case, the final payment suite passed **13/13 tests**. Together these runs cover 44 distinct tests; the full suite was not rerun after this final targeted change.
+- The production build and compiled-server smoke check passed again. These checks make no external provider requests.
+- Git whitespace checks passed. The follow-up requires no new SQL migration, dependency or environment variable.
+
+The new tests cover normalization of permitted phone formats, legacy phone-format retry comparison, concurrent identical/conflicting inserts, lost order-response recovery, capture-pending checkout suppression, modal busy controls, test/live isolation, missing credentials and payment status checks while new donations are paused.
+
+GitHub publishing remains blocked: the connected account reports repository push permission, but the app returned HTTP 403 (`Resource not accessible by integration`) when asked to create a blob. Local Git had no usable non-interactive credential. No changes were uploaded and no remote CI run was triggered. Authorize a connection capable of writing repository contents, or sign in to Git locally and push `production/railway-readiness`.
+
+## Original verification - 6 November
 
 ## Passed locally
 

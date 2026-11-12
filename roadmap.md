@@ -4,6 +4,7 @@
 - [x] Preserve the single landing route, main content and contact workflows.
 - [x] Add Node/Nitro, Docker and Railway deployment configuration.
 - [x] Implement hosted payment checkout, server verification, recovery, webhooks and refund reconciliation.
+- [x] Recover lost checkout responses, guard capture-pending payments and test simultaneous assistance retries.
 - [x] Add verified payment acknowledgements with explicit test/tax limitations.
 - [x] Protect assistance submissions with validation, consent, verification permits and restricted database permissions.
 - [x] Add on-page privacy, donation, refund-contact and accessibility information.

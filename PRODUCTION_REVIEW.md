@@ -44,3 +44,13 @@ The website is not a clinical record system. Store only contact/request coordina
 ## Verification
 
 See VALIDATION.md for commands, results and remaining provider/account tests. Successful local checks do not replace staged Supabase/Turnstile/Razorpay tests or an owner-authorised live acceptance payment.
+
+## Follow-up review - 12 November 2026
+
+- A lost order-creation response previously left the browser with only a donation ID/token. The authenticated status endpoint now returns the stored checkout details when it is safe to resume, and the browser recovers them without creating another order.
+- Authorised payments awaiting capture no longer offer another checkout. Controls remain busy until the provider modal closes or payment verification finishes, including provider retry/failure events.
+- Test checkouts cannot be verified or resumed with live credentials. Pausing new donations still permits status checks and verification of existing payments when the matching credentials remain configured.
+- Assistance retry comparisons normalize phone formatting, including older saved records. A concurrent duplicate insert is acknowledged only after confirming that the saved payload matches; conflicts return 409 instead of false success.
+- Regression coverage now includes API retry races, lost-response recovery, mode changes, capture-pending behavior and browser-component modal controls. No additional database migration or environment variables are required for this follow-up.
+
+Publishing was attempted through both local Git and the connected House of Doctors GitHub account. The GitHub app returned HTTP 403, `Resource not accessible by integration`, when creating a blob, despite account-level repository write permission. Local Git also lacked a usable non-interactive credential. No remote branch or commit was created by these attempts.

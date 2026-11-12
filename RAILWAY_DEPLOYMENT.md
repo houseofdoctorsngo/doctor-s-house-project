@@ -126,11 +126,14 @@ This checks SSR, the logo, health and public configuration without creating pati
 | Assistance could not be saved | Apply the full SQL file, check project/key pair, permit trigger and phone request limit. |
 | Donations remain disabled | Check PAYMENTS_MODE, matching key prefix, webhook secret, database variables and Turnstile configuration. |
 | Debited but pending | Use Check payment status; inspect Razorpay capture and webhook delivery. Do not ask the donor to pay twice. |
+| Checkout response was lost | Use Check payment status with the saved browser reference. If the server already stored the provider order, the same checkout can be resumed without creating another order. An authorised payment awaiting capture does not offer Resume. |
 | Order creation unresolved | Gateway timeout can leave a reserved donation without an order ID. Search Razorpay Orders by the donation UUID in `receipt`/notes. An authorised operator can attach the verified matching order ID in Supabase after checking amount and mode. If there is no order, tell the donor to clear the unpaid checkout. Never infer payment success from a screenshot. |
 | Old test checkout fails after going live | Clear the test browser session and use a new checkout. Test and live credentials are separate. |
 | Gallery has no photos | Add real approved local assets; the old `/__l5e/` asset URLs are not portable. |
 
-To pause new donations, set PAYMENTS_MODE=disabled and redeploy. Keep existing keys/webhook configuration until outstanding payments and refunds are reconciled. To roll back the site, redeploy the previous known-good Railway deployment; preserve database records and reconcile any events that arrived during the incident.
+To pause new donations, set PAYMENTS_MODE=disabled and redeploy. Keep existing keys/webhook configuration until outstanding payments and refunds are reconciled. Existing payment status/verification and webhooks continue with matching credentials; checkout recovery does not offer Resume while paused. To roll back the site, redeploy the previous known-good Railway deployment; preserve database records and reconcile any events that arrived during the incident.
+
+Before launch, also simulate a lost order response, then recover the same order using Check payment status. Confirm Resume is absent while a payment awaits capture, that checkout controls remain disabled while the provider modal is open, and that paused donations still allow status checks. Keep test and live acceptance records separate.
 
 ## References
 

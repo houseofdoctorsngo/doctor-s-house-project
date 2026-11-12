@@ -9,7 +9,7 @@ type CheckoutResult = { razorpay_payment_id: string; razorpay_order_id: string; 
 type Checkout = { open: () => void; on: (event: string, callback: () => void) => void };
 declare global { interface Window { Razorpay?: new (options: Record<string, unknown>) => Checkout } }
 type Pending = { id: string; token: string; orderId?: string; keyId?: string; amount?: number; mode?: string };
-type Confirmation = { id: string; name: string; amount: number; orderId: string | null; paymentId: string | null; status: string; mode: string; date: string; refunded: number };
+type Confirmation = { id: string; name: string; amount: number; orderId: string | null; paymentId: string | null; status: string; mode: string; date: string; refunded: number; checkout?: { orderId: string; keyId: string; amount: number; mode: string } | null; awaitingCapture?: boolean };
 const storageKey = 'thd-donation-session';
 let sdk: Promise<void> | undefined;
 function loadCheckout() {
@@ -46,7 +46,9 @@ export function Donation() {
     if (!current) return null;
     const result = await api<Confirmation>('/api/payments/status', current);
     setConfirmation(result);
-    if (result.status === 'pending') setMessage('Payment is not confirmed yet. If money was debited, wait and check again; do not make a second payment.');
+    if (result.checkout) remember({ id: current.id, token: current.token, ...result.checkout });
+    if (result.awaitingCapture) setMessage('Your payment is authorised and awaiting capture. Do not pay again. Check its status shortly or contact our team.');
+    else if (result.status === 'pending') setMessage('Payment is not confirmed yet. If money was debited, wait and check again; do not make a second payment.');
     else setMessage('');
     return result;
   }
@@ -54,22 +56,26 @@ export function Donation() {
     if (!current.orderId || !current.keyId || !current.amount) throw new Error('Order creation is unresolved. Contact our team with the reference below.');
     await loadCheckout();
     if (!window.Razorpay) throw new Error('Payment provider did not load.');
-    const checkout = new window.Razorpay({
+    // Keep the action busy for the lifetime of the provider modal, including retries.
+    await new Promise<void>((resolve, reject) => {
+    let verifying = false;
+    const checkout = new window.Razorpay!({
       key: current.keyId, order_id: current.orderId, amount: current.amount, currency: 'INR', name: 'The House of Doctor', description: 'Donation for rural healthcare', prefill,
-      modal: { ondismiss: () => { setBusy(false); setMessage('Checkout closed. Check payment status before making another donation.'); } },
+      modal: { ondismiss: () => { if (!verifying) { setMessage('Checkout closed. Check payment status before making another donation.'); resolve(); } } },
       handler: async (result: CheckoutResult) => {
-        setBusy(true);
+        verifying = true;
         try {
           const verified = await api<Confirmation>('/api/payments/verify', { id: current.id, token: current.token, paymentId: result.razorpay_payment_id, signature: result.razorpay_signature });
           setConfirmation(verified);
           setMessage(verified.status === 'pending' ? 'Payment is awaiting capture. Please check its status shortly; do not pay again.' : '');
         } catch (error) { setMessage(error instanceof Error ? error.message : 'Confirmation pending. Check payment status.'); }
-        finally { setBusy(false); }
+        finally { resolve(); }
       },
       theme: { color: '#25345e' },
     });
-    checkout.on('payment.failed', () => { setBusy(false); setMessage('The payment attempt failed. Check the status before retrying this checkout.'); });
-    checkout.open();
+    checkout.on('payment.failed', () => { setMessage('The payment attempt failed. Close checkout and check the status before retrying.'); });
+    try { checkout.open(); } catch (error) { reject(error); }
+    });
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (busy) return;
@@ -84,7 +90,7 @@ export function Donation() {
       const ready = { ...current, ...order }; remember(ready);
       await openCheckout(ready, { name: parsed.data.name, email: parsed.data.email, contact: parsed.data.phone });
     } catch (error) { setBusy(false); setMessage(error instanceof Error ? error.message : 'Unable to open checkout.'); }
-    finally { setHumanToken(''); setResetKey(key => key + 1); }
+    finally { setBusy(false); setHumanToken(''); setResetKey(key => key + 1); }
   }
   async function action(callback: () => Promise<unknown>) {
     setBusy(true); setMessage('');
@@ -126,7 +132,7 @@ export function Donation() {
           <p className="text-xs break-all">Reference: {pending.id}</p>
           {confirmation && <dl className="text-sm space-y-2"><div>Amount: {formatINR(confirmation.amount)}</div><div>Status: {confirmation.status.replaceAll('_', ' ')}</div>{confirmation.refunded > 0 && <div>Refunded: {formatINR(confirmation.refunded)}</div>}</dl>}
           <Button variant="heal" className="w-full" disabled={busy} onClick={() => action(() => check())}>Check payment status</Button>
-          {(!confirmation || confirmation.status === 'pending') && pending.orderId && config?.paymentsMode !== 'disabled' && <Button className="w-full" variant="mission" disabled={busy} onClick={() => action(async () => { const result = await check(); if (result?.status === 'pending') await openCheckout(pending); })}>Resume this checkout</Button>}
+          {(!confirmation || confirmation.status === 'pending') && !confirmation?.awaitingCapture && pending.orderId && config && config.paymentsMode !== 'disabled' && <Button className="w-full" variant="mission" disabled={busy} onClick={() => action(async () => { const result = await check(); if (result?.checkout) await openCheckout({ id: pending.id, token: pending.token, ...result.checkout }); })}>Resume this checkout</Button>}
           {confirmation && confirmation.status !== 'pending' && <><Button variant="mission" className="w-full" disabled={busy} onClick={() => action(download)}><Download/>Download acknowledgement</Button><p className="text-xs leading-6">This is not an official donation receipt or tax certificate. Contact the NGO after settlement for an official receipt.</p><Button variant="ghost" onClick={() => { remember(null); setConfirmation(null); setMessage(''); }}>Start another donation</Button></>}
           {(!confirmation || confirmation.status === 'pending') && <Button variant="ghost" className="text-xs whitespace-normal h-auto" disabled={busy} onClick={() => { if (window.confirm('Only clear this checkout if you have not paid or authorised a payment. If money was debited or the result is uncertain, cancel and contact the NGO with your reference. Clear the checkout?')) { remember(null); setConfirmation(null); setMessage(''); } }}>Clear unpaid checkout and change details</Button>}
         </div> : <form onSubmit={submit}><h3 className="text-xl mb-4">A gift from you. Hope for someone.</h3>
