@@ -10,6 +10,8 @@
 - [x] Add on-page privacy, donation, refund-contact and accessibility information.
 - [x] Preserve the published logo locally; replace broken gallery links with configurable local assets.
 - [x] Document account setup, secrets, deployment, staff review and incident recovery.
+- [x] Provide first-time Supabase setup verification and graphical GitHub Desktop publishing instructions.
+- [x] Remove unused Lovable runtime/auth/project references and address the Vite/Zod dependency advisories found in the launch audit.
 - [ ] Apply and verify the SQL against the owner's staging Supabase project.
 - [ ] Configure Railway domain, Supabase credentials and Turnstile keys.
 - [ ] Complete Razorpay account approval and staged checkout/webhook/refund acceptance tests.

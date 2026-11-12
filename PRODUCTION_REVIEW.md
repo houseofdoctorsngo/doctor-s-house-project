@@ -54,3 +54,15 @@ See VALIDATION.md for commands, results and remaining provider/account tests. Su
 - Regression coverage now includes API retry races, lost-response recovery, mode changes, capture-pending behavior and browser-component modal controls. No additional database migration or environment variables are required for this follow-up.
 
 Publishing was attempted through both local Git and the connected House of Doctors GitHub account. The GitHub app returned HTTP 403, `Resource not accessible by integration`, when creating a blob, despite account-level repository write permission. Local Git also lacked a usable non-interactive credential. No remote branch or commit was created by these attempts.
+
+## Fresh-database launch audit - 12 November 2026
+
+The owner confirmed there is no existing database. FIRST_TIME_SETUP.md now provides the authoritative first-time setup: graphical GitHub Desktop publishing, fresh Supabase schema and permission verification, Railway domain/variables, Turnstile, Razorpay test/live configuration, manual acceptance and staff operation.
+
+Removed unused Lovable preview/auth/cron clients, editor error-reporting hooks, old fixed Supabase project linkage, obsolete gallery asset metadata, empty Drizzle configuration/migrations, and Bun-specific Lovable package exceptions. Removed unused Drizzle/Postgres development dependencies. Historical planning files remain only as reference. Git history is preserved.
+
+Added SUPABASE_SECRET_KEY with legacy-variable compatibility, opaque-key header handling and bounded database network requests. Invalid production SITE_URL values now disable public forms instead of advertising availability. Signed malformed webhook payloads return client errors. A read-only SQL verification script detects missing schema, unsafe public grants, missing triggers and exposed payment functions; tests prove it catches an accidentally granted public SELECT permission.
+
+The registry audit identified Vite and Zod advisories. Upgraded Vite to 8.1.6 and Zod to 4.6.7 and added a production dependency audit to CI. Relevant advisories: https://github.com/advisories/GHSA-587h-7wmj-h5pm and https://github.com/advisories/GHSA-mrhx-c7xc-m3w5. See VALIDATION.md for the final audit/build/test outcome and limits.
+
+The GitHub app upload retry still returned HTTP 403. Public visibility does not give an integration write permission. No live database, merchant account, domain or hosting account was configured by this code session. Merchant approval, owner credentials, a successful remote CI/Docker deployment, real browser checks and authorised payment/settlement acceptance remain external launch gates.

@@ -4,6 +4,22 @@ import { handleApi } from '../server/api';
 
 afterEach(() => vi.unstubAllEnvs());
 describe('Public API configuration and failures', () => {
+  it('supports a fresh project secret key without exposing it in public configuration', async () => {
+    vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('SITE_URL', 'https://ngo.example');
+    vi.stubEnv('SUPABASE_URL', 'https://db.example'); vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_private');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', ''); vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_example');
+    vi.stubEnv('TURNSTILE_SECRET_KEY', 'private-widget'); vi.stubEnv('TURNSTILE_SITE_KEY', 'public-widget');
+    const data = await (await handleApi(new Request('https://ngo.example/api/config')))?.json();
+    expect(data.assistanceEnabled).toBe(true); expect(JSON.stringify(data)).not.toContain('sb_secret_private');
+  });
+  it.each(['', 'not-a-url', 'https://ngo.example/a-path', 'http://ngo.example', 'https://user:password@ngo.example'])('disables production forms for an invalid SITE_URL: %s', async url => {
+    vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('SITE_URL', url);
+    vi.stubEnv('SUPABASE_URL', 'https://db.example'); vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_private');
+    vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_example');
+    vi.stubEnv('TURNSTILE_SECRET_KEY', 'private-widget'); vi.stubEnv('TURNSTILE_SITE_KEY', 'public-widget');
+    const data = await (await handleApi(new Request('https://ngo.example/api/config')))?.json();
+    expect(data.assistanceEnabled).toBe(false); expect(data.paymentsMode).toBe('disabled');
+  });
   it('serves a healthcheck without requiring provider credentials', async () => {
     const response = await handleApi(new Request('https://ngo.example/api/health'));
     expect(response?.status).toBe(200);

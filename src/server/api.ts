@@ -3,22 +3,35 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { assistanceSchema, donorSchema, normalizeIndianPhone } from '../lib/ngo';
 import { hashToken, limitedBody, sameOrigin, validSignature } from './security';
+import { supabaseFetch } from './supabase-fetch';
 
 class ApiError extends Error { constructor(public status: number, message: string) { super(message); } }
 const env = (key: string) => process.env[key] || '';
+const secretKey = () => env('SUPABASE_SECRET_KEY') || env('SUPABASE_SERVICE_ROLE_KEY');
+function siteOrigin() {
+  try {
+    const url = new URL(env('SITE_URL'));
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.pathname !== '/' || url.search || url.hash) return null;
+    if (env('NODE_ENV') === 'production' && url.protocol !== 'https:') return null;
+    return url.origin;
+  } catch { return null; }
+}
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
 function database(admin = true) {
-  const key = env(admin ? 'SUPABASE_SERVICE_ROLE_KEY' : 'SUPABASE_PUBLISHABLE_KEY');
+  const key = admin ? secretKey() : env('SUPABASE_PUBLISHABLE_KEY');
   if (!env('SUPABASE_URL') || !key) throw new ApiError(503, 'Online requests are temporarily unavailable. Please call +91 75688 96804.');
-  return createClient(env('SUPABASE_URL'), key, { auth: { persistSession: false, autoRefreshToken: false } });
+  return createClient(env('SUPABASE_URL'), key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: supabaseFetch(key) },
+  });
 }
 function mode(): 'disabled' | 'test' | 'live' {
   const value = env('PAYMENTS_MODE');
-  if ((value === 'test' || value === 'live') && env('RAZORPAY_KEY_ID').startsWith(`rzp_${value}_`) && env('RAZORPAY_KEY_SECRET') && env('RAZORPAY_WEBHOOK_SECRET') && env('SUPABASE_SERVICE_ROLE_KEY') && env('SUPABASE_URL')) return value;
+  if ((value === 'test' || value === 'live') && env('RAZORPAY_KEY_ID').startsWith(`rzp_${value}_`) && env('RAZORPAY_KEY_SECRET') && env('RAZORPAY_WEBHOOK_SECRET') && secretKey() && env('SUPABASE_URL')) return value;
   return 'disabled';
 }
 function formsReady() {
-  return !!(env('SUPABASE_URL') && env('SUPABASE_SERVICE_ROLE_KEY') && env('SUPABASE_PUBLISHABLE_KEY') &&
+  return !!(siteOrigin() && env('SUPABASE_URL') && secretKey() && env('SUPABASE_PUBLISHABLE_KEY') &&
     (env('NODE_ENV') !== 'production' || (env('TURNSTILE_SECRET_KEY') && env('TURNSTILE_SITE_KEY'))));
 }
 async function checkHuman(token: string, action: string) {
@@ -78,7 +91,10 @@ export async function handleApi(request: Request): Promise<Response | null> {
       if (!env('RAZORPAY_WEBHOOK_SECRET')) throw new ApiError(503, 'Webhook not configured');
       const raw = await limitedBody(request, 65536);
       if (!validSignature(raw, request.headers.get('x-razorpay-signature') || '', env('RAZORPAY_WEBHOOK_SECRET'))) throw new ApiError(401, 'Invalid signature');
-      const event = JSON.parse(raw);
+      const event = z.object({ event: z.string(), payload: z.object({
+        payment: z.object({ entity: z.object({ id: z.string() }) }).optional(),
+        refund: z.object({ entity: z.object({ payment_id: z.string() }) }).optional(),
+      }).optional() }).parse(JSON.parse(raw));
       if (!['payment.captured', 'order.paid', 'refund.processed'].includes(event.event)) return json({ received: true });
       const paymentId = event.payload?.payment?.entity?.id || event.payload?.refund?.entity?.payment_id;
       if (typeof paymentId !== 'string' || !/^pay_[A-Za-z0-9]+$/.test(paymentId)) throw new ApiError(400, 'Invalid payment event');
@@ -89,7 +105,9 @@ export async function handleApi(request: Request): Promise<Response | null> {
       // Unknown orders may originate in another integration on the same merchant account.
       return json({ received: true });
     }
-    if (!env('SITE_URL') || !sameOrigin(request, env('SITE_URL'))) throw new ApiError(403, 'Request origin not allowed');
+    const origin = siteOrigin();
+    if (!origin) throw new ApiError(503, 'Online forms are not configured yet. Please contact our team.');
+    if (!sameOrigin(request, origin)) throw new ApiError(403, 'Request origin not allowed');
     if (!request.headers.get('content-type')?.startsWith('application/json')) throw new ApiError(415, 'JSON required');
     const body: unknown = JSON.parse(await limitedBody(request));
     if (path === '/api/assistance') {

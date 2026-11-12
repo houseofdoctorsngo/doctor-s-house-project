@@ -2,11 +2,12 @@
 
 Single-page NGO website for rural healthcare across Mewar, built with React, TypeScript and TanStack Start. Railway runs the Node/Nitro application. Supabase stores private assistance requests and donation records; Razorpay handles hosted payment checkout.
 
-**Start here: [Railway deployment guide](RAILWAY_DEPLOYMENT.md).** It covers local setup, Supabase SQL, Railway, domains, verification, payment activation, staff operations and recovery.
+**Start here: [First-time setup without PowerShell](FIRST_TIME_SETUP.md).** It covers GitHub Desktop upload, a new Supabase database, Railway, exact variables, Turnstile, Razorpay testing/live activation, Lovable replacement and staff operations.
 
 - [Production review](PRODUCTION_REVIEW.md): architecture, gaps addressed and launch dependencies.
 - [Validation](VALIDATION.md): actual local check results and unverified external integrations.
 - [Database setup](supabase/production.sql): apply to a staging Supabase project first.
+- [Verify database setup](supabase/verify-setup.sql): run after setup; expect PASS.
 - [Environment template](.env.example): variable names only; never commit real secrets.
 - [Original design brief](docs/ORIGINAL_BRIEF.md): preserved reference; deployment and payment behaviour are governed by the current code and deployment guide.
 

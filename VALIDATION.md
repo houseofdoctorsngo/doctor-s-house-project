@@ -1,5 +1,19 @@
 # Validation - updated 12 November 2026
 
+## Latest first-time launch audit
+
+- **TypeScript passed** after removing unused Lovable integrations and updating Vite/Zod.
+- **65 tests passed across 10 files** using installed Vite 8.1.6 and Zod 4.6.7. This includes signed webhooks, malformed/tampered events, capture/refund validation, opaque Supabase key transport, invalid deployment URLs, fresh-database permissions and the operator SQL verification script, plus the existing recovery and UI component tests.
+- **Production build and compiled-server smoke checks passed** with the patched dependencies: SSR, response headers, local logo, four referenced assets, safe public configuration, origin/JSON rejection, disabled checkout and 404 handling. No external provider requests were made by the smoke test.
+- **Production dependency audit: 0 known vulnerabilities** (`npm audit --omit=dev`, checked 12 November 2026). The earlier audit found Vite and Zod advisories; both were addressed. This result is time-specific and does not certify absence of all security flaws. CI now runs the production audit.
+- Removed unused Drizzle/Postgres tooling and its dependencies. Initial pruning changed no retained dependency versions; the intentional follow-up changes update Vite and Zod. The npm lockfile remains authoritative for CI/Docker.
+- The local installers were interrupted/failed in this Windows tool environment. For the final local run, the Vite/Zod npm registry archives were checked against their package-lock SHA-512 integrity values and installed into the existing dependency tree. A clean Linux `npm ci` and Docker deployment still need to pass remotely.
+- No active Lovable hooks, preview-auth integration, old asset paths or fixed Supabase project reference remain in application source. Historical planning metadata is retained only as reference.
+
+Use [FIRST_TIME_SETUP.md](FIRST_TIME_SETUP.md) for the complete fresh-database setup and GUI upload instructions. GitHub Desktop is installed locally, but its user sign-in/publish step is still manual. The connected GitHub app upload retry returned HTTP 403. No remote branch, CI deployment, Supabase project, Razorpay account or Railway service was created by this session.
+
+The older sections below record previous checkpoints; the latest 65-test run supersedes their test counts. Browser-component tests do not replace desktop/mobile tests on the deployed domain. Live Supabase, Turnstile, Razorpay and settlement acceptance remain required.
+
 ## Follow-up verification - 12 November
 
 - TypeScript passed again after the follow-up changes.

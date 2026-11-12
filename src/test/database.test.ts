@@ -30,6 +30,13 @@ async function submit(value: Awaited<ReturnType<typeof permit>>) {
 }
 
 describe('Database permissions and validation', () => {
+  it('passes the operator verification script and detects accidental public access', async () => {
+    const verification = await readFile(new URL('../../supabase/verify-setup.sql', import.meta.url), 'utf8');
+    await db.exec(verification);
+    await db.exec('GRANT SELECT ON donations TO anon');
+    try { await expect(db.exec(verification)).rejects.toThrow(/Unsafe visitor permission/); }
+    finally { await db.exec('REVOKE SELECT ON donations FROM anon'); }
+  });
   it('allows only verified insert-only assistance submissions', async () => {
     const value = await permit();
     await submit(value);
