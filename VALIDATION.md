@@ -1,62 +1,93 @@
-# Validation - updated 12 November 2026
+# Release validation and owner acceptance
 
-## Latest first-time launch audit
+Updated 16 November 2026. This supersedes prior Razorpay test counts and temporary-branch instructions. Follow FIRST_TIME_SETUP.md before checking remote providers.
 
-- **TypeScript passed** after removing unused Lovable integrations and updating Vite/Zod.
-- **65 tests passed across 10 files** using installed Vite 8.1.6 and Zod 4.6.7. This includes signed webhooks, malformed/tampered events, capture/refund validation, opaque Supabase key transport, invalid deployment URLs, fresh-database permissions and the operator SQL verification script, plus the existing recovery and UI component tests.
-- **Production build and compiled-server smoke checks passed** with the patched dependencies: SSR, response headers, local logo, four referenced assets, safe public configuration, origin/JSON rejection, disabled checkout and 404 handling. No external provider requests were made by the smoke test.
-- **Production dependency audit: 0 known vulnerabilities** (`npm audit --omit=dev`, checked 12 November 2026). The earlier audit found Vite and Zod advisories; both were addressed. This result is time-specific and does not certify absence of all security flaws. CI now runs the production audit.
-- Removed unused Drizzle/Postgres tooling and its dependencies. Initial pruning changed no retained dependency versions; the intentional follow-up changes update Vite and Zod. The npm lockfile remains authoritative for CI/Docker.
-- The local installers were interrupted/failed in this Windows tool environment. For the final local run, the Vite/Zod npm registry archives were checked against their package-lock SHA-512 integrity values and installed into the existing dependency tree. A clean Linux `npm ci` and Docker deployment still need to pass remotely.
-- No active Lovable hooks, preview-auth integration, old asset paths or fixed Supabase project reference remain in application source. Historical planning metadata is retained only as reference.
+## Evidence from this change
 
-Use [FIRST_TIME_SETUP.md](FIRST_TIME_SETUP.md) for the complete fresh-database setup and GUI upload instructions. GitHub Desktop is installed locally, but its user sign-in/publish step is still manual. The connected GitHub app upload retry returned HTTP 403. No remote branch, CI deployment, Supabase project, Razorpay account or Railway service was created by this session.
+- Final TypeScript typecheck: **passed**.
+- Final unit/integration/browser-component suite: **81 passed across 11 files**, run with `vitest run --maxWorkers=2`. The unrestricted two-worker rerun resolved sandbox worker-start timeouts; no failed assertions remained.
+- Production build: passed on Node 22.23.4 / Vite 8.1.6 / Nitro Node output.
+- Compiled production smoke: passed (SSR, security headers, public fail-closed config, logo/assets, origin/JSON rejection, disabled payments and 404).
+- Production dependency audit: **0 known vulnerabilities** at execution time; this is not a guarantee against all security defects.
+- Browser: opened both public URLs; confirmed apex-to-www redirect, old phone, disabled transactions and empty/reference-placeholder galleries. Updated local production preview confirmed Cashfree copy, new tel/WhatsApp values, patient-support options, refund anchor opening and mobile navigation. Mobile 390px viewport check showed no horizontal overflow in the inspected state.
+- Tests use mocked Cashfree/Supabase HTTP boundaries where specified. Database tests execute real schema/permissions/triggers in isolated PGlite, including repeated setup and monotonic refund updates. They do not connect to the owner's database.
+- The restricted execution sandbox initially blocked loopback HTTP; rerunning the production smoke with loopback access passed. This was an environment limitation, not an application failure.
 
-The older sections below record previous checkpoints; the latest 65-test run supersedes their test counts. Browser-component tests do not replace desktop/mobile tests on the deployed domain. Live Supabase, Turnstile, Razorpay and settlement acceptance remain required.
+No real Cashfree payment, refund, bank settlement, real Turnstile submission or live Supabase write has been claimed. Media playback with the user's field files is pending those files. An initial Publications click was blocked by an automatic approval-review usage limit. After access resumed, the section and email links were verified. The subsequent guide-download observation timed out; actual PDF download remains unverified.
 
-## Follow-up verification - 12 November
+## Repeatable developer gate
 
-- TypeScript passed again after the follow-up changes.
-- Full Vitest run: **43 tests passed across 8 files**, including the new assistance retry API tests and donation browser-component tests.
-- After adding the paused-donations case, the final payment suite passed **13/13 tests**. Together these runs cover 44 distinct tests; the full suite was not rerun after this final targeted change.
-- The production build and compiled-server smoke check passed again. These checks make no external provider requests.
-- Git whitespace checks passed. The follow-up requires no new SQL migration, dependency or environment variable.
+```sh
+npm run typecheck
+npm test
+npm run audit:production
+npm run build
+npm run test:production
+node scripts/check-production.mjs https://www.thehouseofdoctor.in
+```
 
-The new tests cover normalization of permitted phone formats, legacy phone-format retry comparison, concurrent identical/conflicting inserts, lost order-response recovery, capture-pending checkout suppression, modal busy controls, test/live isolation, missing credentials and payment status checks while new donations are paused.
+Run with Node 22.23.4+ and the locked npm dependencies. GitHub Actions additionally builds the Railway Docker image. The read-only deployed check creates no requests/payments. Verify its commit matches the release; passing configuration presence checks alone does not prove provider connectivity.
 
-GitHub publishing remains blocked: the connected account reports repository push permission, but the app returned HTTP 403 (`Resource not accessible by integration`) when asked to create a blob. Local Git had no usable non-interactive credential. No changes were uploaded and no remote CI run was triggered. Authorize a connection capable of writing repository contents, or sign in to Git locally and push `production/railway-readiness`.
+## Supabase and assistance acceptance
 
-## Original verification - 6 November
+- [ ] Export/verify existing data before schema update; retain backup privately.
+- [ ] Apply current production.sql and run verify-setup.sql: PASS.
+- [ ] Verify no public SELECT/UPDATE/DELETE on requests, donations or permits.
+- [ ] Add canonical site, Supabase and Turnstile variables; rebuild/deploy main.
+- [ ] `/api/config`: assistanceEnabled true; no private keys in response or page source.
+- [ ] Submit labelled QA request with NGO-controlled test contact, valid consent and real Turnstile on www hostname.
+- [ ] Success UUID corresponds to exactly one row, status new, correct fields and consent timestamp.
+- [ ] Test invalid number/missing consent, expired verification and repeated submission; no false success or duplicate records.
+- [ ] Staff can assign owner, set follow-up, move through contacted/in_progress/closed; visitors cannot.
+- [ ] Duty coordinator and backup know the queue and phone/email/WhatsApp channels. Close QA records with a note.
 
-## Passed locally
+## Cashfree sandbox matrix
 
-| Check | Result |
+| Scenario | Expected evidence |
 | --- | --- |
-| TypeScript (`tsc --noEmit`) | Passed; repeated successfully after resuming the Windows workspace. |
-| Vitest | **28 tests passed across 6 files.** |
-| Production Vite/Nitro build | Passed; generated `.output/server/index.mjs` and client assets. |
-| Production runtime (`node scripts/test-production.mjs`) | Passed against the compiled Node server, with external credentials removed. |
-| Git whitespace/diff check | Passed; Git emitted only Windows line-ending conversion notices. |
+| Successful payment | Cashfree PAID order + SUCCESS captured payment; exact amount/currency/order; one matching Supabase row, provider cashfree, mode test |
+| Fake browser success | No paid status without provider verification |
+| Cancel / failed attempt | Pending/uncertain guidance; no paid acknowledgement |
+| Pending/preauthorised payment | No Resume invitation until safe; no claimed payment receipt |
+| Reload / lost order response | Same-tab Check payment status recovers the existing order/session |
+| Creation timeout | Persisted deterministic order; Retry this order uses same UUID idempotency key after verification |
+| Expired/terminated order | No reopen; check debits before clearing and starting again |
+| SDK script blocked/offline | Visible error and retained reference; no false success |
+| Modal open | Status/resume buttons remain busy until checkout closes/completes |
+| Signed webhook | Cashfree logs show HTTP 200 after provider lookup and durable database update |
+| Invalid signature/body mutation | Rejected; no payment write |
+| Provider/database outage | Non-200 retryable result; fix and resend failed events |
+| Duplicate/out-of-order events | No duplicate donation; cannot reduce already verified refund total |
+| Partial and full refund | Only successful matching refunds counted; pending/failed refunds excluded |
+| Auto refund | Order-linked event reconciled; no-order events require dashboard review |
+| Amount/currency/order mismatch | Rejected, never marked paid |
+| Paused donations | PAYMENTS_MODE disabled prevents new checkout, retains status/webhooks with unchanged credentials |
+| Test/live switch | Old test references blocked under production credentials, test rows preserved |
+| Legacy Razorpay row | Not processed through Cashfree; staff contact guidance |
+| Download | TEST PAYMENT - NO MONEY RECEIVED acknowledgement, correct reference/amount/refund; not official tax receipt |
 
-The tests cover shared input rules, route matching, HMAC signatures and tampering, raw webhook-body validation, origin and body-size restrictions, disabled/mismatched payment configuration, provider amount/currency/order mismatches, authorised-only payments, and captured-payment confirmation.
+Do these with real sandbox credentials after automated checks. Check webhook logs and SQL evidence, not only the checkout screen. Retain order IDs and test outcomes privately, without secrets or patient data.
 
-Database tests execute the real `supabase/production.sql` against an isolated PostgreSQL-compatible PGlite instance. They apply the setup twice, check anonymous/authenticated read-update-delete denial, restrict staff fields, consume single-use permits, reject expired/replayed/mismatched permits, enforce request limits and constraints, and exercise duplicate/out-of-order payment/refund updates. They do not connect to the owner's live Supabase database.
+## Website and media acceptance
 
-Runtime smoke checks verified server-rendered content, security response headers, the local logo, four referenced application assets, fail-closed public configuration, cross-origin rejection, malformed JSON rejection, disabled payment handling and a missing-page 404. No patient request, email, message or payment was sent to an external service.
+- [ ] Desktop and phone: navigation, keyboard focus/Escape, accordions, library search/empty result, donate amounts/custom amount, all consent and policy links.
+- [ ] Phone and WhatsApp destination: +91 75689 68704 / 917568968704. Email: houseofdoctorsngo@gmail.com.
+- [ ] Partner/report links open correct email subjects; office actually monitors incoming mail.
+- [ ] Health PDF downloads and fits pages; medical content approved by NGO clinician.
+- [ ] Supplied photos/videos have consent, captions/alt text, appropriate sizing, accessible transcript/captions; actual MP4 plays on mobile and desktop.
+- [ ] Gallery previous/next and pause work; no autoplay video or forced advance during a video.
+- [ ] Final canonical/social metadata uses www domain and logo; apex redirect preserves intended navigation.
+- [ ] Inherited service and organisation claims approved by NGO management.
 
-## Installation note
+## Live acceptance and operations
 
-The machine's npm 10.9.2 encountered an installer error. npm 12 generated the package-lock, but local extraction was repeatedly interrupted by execution limits. Bun 1.4.4 successfully repaired the local dependencies using the npm lockfile (`bun install --ignore-scripts --no-save`). Validation then ran using Node 22.23.4. Docker and CI use Node 22.23.4 / npm 12.2.2 and `npm ci`.
+- [ ] Cashfree production approval, bank details, approved domain and production webhook configured.
+- [ ] Sandbox webhook no longer targets service using live credentials.
+- [ ] PAYMENTS_MODE live matches CASHFREE_ENV production; fresh browser session.
+- [ ] Authorised owner makes a small real donation; website, Supabase and Cashfree agree.
+- [ ] Finance reconciles bank settlement/fees, records settled_at/reference, and issues official receipt under NGO procedure.
+- [ ] Duty/finance/office backups assigned; daily reconciliation and unresolved-request review operating.
+- [ ] Provider dispute deadlines, webhook failures, Railway errors and backup/restore procedure owned.
+- [ ] GitHub Actions and Railway deployment succeeded for the pushed main commit; enable Wait for CI.
 
-A clean Linux Docker build and the GitHub Actions workflow have not yet run in their remote environments. Do not confuse the successful local production build with a successful Railway deployment.
-
-## Still required before public launch
-
-1. Apply SQL and verify the full HTTP/database flow on an owner-controlled staging Supabase project.
-2. Configure real Turnstile keys and test correct hostname/action handling in a browser.
-3. Test the approved Razorpay account: success, cancellation, failure, refresh/recovery, webhook delivery/retry, capture, refunds and settlement reconciliation.
-4. Test desktop/mobile browser interaction and keyboard access on the deployed domain. Browser automation was unavailable for the final local pass; the earlier live-site review is not a visual test of this modified build.
-5. Confirm NGO identity, service claims, policy wording, staff response process, retention practices and official receipt procedure. Provide approved camp photos and publications when available.
-6. Run `node scripts/check-production.mjs https://YOUR-DOMAIN` after Railway deployment and have an authorised owner complete the live acceptance payment.
-
-The local code/build checks passed. **Production account activation and end-to-end acceptance remain outstanding.** Follow RAILWAY_DEPLOYMENT.md in order.
+Launch is accepted only when the required external checks above are completed. The code can be deployed safely with transactions disabled while setup continues.

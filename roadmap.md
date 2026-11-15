@@ -1,22 +1,11 @@
-# Launch status
+# Release and operations roadmap
 
-- [x] Review the supplied live site and repository before modifying the code.
-- [x] Preserve the single landing route, main content and contact workflows.
-- [x] Add Node/Nitro, Docker and Railway deployment configuration.
-- [x] Implement hosted payment checkout, server verification, recovery, webhooks and refund reconciliation.
-- [x] Recover lost checkout responses, guard capture-pending payments and test simultaneous assistance retries.
-- [x] Add verified payment acknowledgements with explicit test/tax limitations.
-- [x] Protect assistance submissions with validation, consent, verification permits and restricted database permissions.
-- [x] Add on-page privacy, donation, refund-contact and accessibility information.
-- [x] Preserve the published logo locally; replace broken gallery links with configurable local assets.
-- [x] Document account setup, secrets, deployment, staff review and incident recovery.
-- [x] Provide first-time Supabase setup verification and graphical GitHub Desktop publishing instructions.
-- [x] Remove unused Lovable runtime/auth/project references and address the Vite/Zod dependency advisories found in the launch audit.
-- [ ] Apply and verify the SQL against the owner's staging Supabase project.
-- [ ] Configure Railway domain, Supabase credentials and Turnstile keys.
-- [ ] Complete Razorpay account approval and staged checkout/webhook/refund acceptance tests.
-- [ ] Verify NGO registration, service availability, policy wording and accounting/receipt procedure.
-- [ ] Supply approved event photographs and official publication PDFs.
-- [ ] Deploy and complete owner-authorised live acceptance testing.
+Updated 16 November 2026.
 
-Local verification results are recorded in VALIDATION.md. Account-dependent items cannot be completed from source code alone.
+1. **Implemented:** Cashfree integration, contact update, request ownership/follow-up fields, reconciliation fields, patient-support options, navigation gaps, media support and current operator docs.
+2. **Owner setup:** apply/verify SQL on the existing Supabase project, add Railway variables, configure real Turnstile and Cashfree sandbox/domain/webhooks. Follow FIRST_TIME_SETUP.md.
+3. **Acceptance:** complete the provider and staffed-operations checks in VALIDATION.md. Then authorise live activation and reconcile the first real settlement.
+4. **Media/content:** attach approved field photos/videos and captions; publish real reports/proposals when supplied. Confirm current service and organisation claims with the NGO.
+5. **Team growth:** if direct dashboard operation becomes insufficient, scope a separate authenticated staff portal, granular roles and reliable notification delivery. These are not claimed as implemented.
+
+See PROJECT_AUDIT.md and OPERATIONS.md for the concrete current workflow and open responsibilities.

@@ -6,7 +6,7 @@ const origin = 'http://127.0.0.1:43127';
 const server = spawn(process.execPath, ['.output/server/index.mjs'], {
   cwd: process.cwd(), windowsHide: true,
   env: { ...process.env, NODE_ENV: 'production', HOST: '127.0.0.1', PORT: '43127', SITE_URL: 'https://ngo.example',
-    PAYMENTS_MODE: 'disabled', SUPABASE_URL: '', SUPABASE_PUBLISHABLE_KEY: '', SUPABASE_SECRET_KEY: '', SUPABASE_SERVICE_ROLE_KEY: '', TURNSTILE_SECRET_KEY: '', TURNSTILE_SITE_KEY: '', RAZORPAY_KEY_ID: '', RAZORPAY_KEY_SECRET: '', RAZORPAY_WEBHOOK_SECRET: '' },
+    PAYMENTS_MODE: 'disabled', SUPABASE_URL: '', SUPABASE_PUBLISHABLE_KEY: '', SUPABASE_SECRET_KEY: '', SUPABASE_SERVICE_ROLE_KEY: '', TURNSTILE_SECRET_KEY: '', TURNSTILE_SITE_KEY: '', CASHFREE_APP_ID: '', CASHFREE_SECRET_KEY: '', CASHFREE_ENV: '' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';

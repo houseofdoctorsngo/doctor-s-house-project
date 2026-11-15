@@ -30,10 +30,10 @@ export function HelpDesk() {
   }
   return <div className="grid md:grid-cols-2 gap-6">
     <div className="space-y-3">
-      <a href="tel:+917568896804" className="flex items-center gap-3 bg-heal-soft p-4 rounded-xl"><span className="icon-badge bg-card"><Phone/></span><span><span className="text-xs text-muted-foreground block">NGO helpline</span><strong className="text-base">+91 75688 96804</strong></span><ArrowRight size={17} className="ml-auto"/></a>
+      <a href="tel:+917568968704" className="flex items-center gap-3 bg-heal-soft p-4 rounded-xl"><span className="icon-badge bg-card"><Phone/></span><span><span className="text-xs text-muted-foreground block">NGO helpline</span><strong className="text-base">+91 75689 68704</strong></span><ArrowRight size={17} className="ml-auto"/></a>
       <a href="mailto:houseofdoctorsngo@gmail.com" className="flex items-center gap-3 p-3"><Mail size={20}/><span className="text-xs break-all">houseofdoctorsngo@gmail.com</span></a>
       <a href="https://www.google.com/maps/search/?api=1&query=Udaipur%2C%20Rajasthan%2C%20India" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3"><MapPin size={20}/><span className="text-xs">Udaipur, Rajasthan, India</span><ExternalLink size={14}/></a>
-      <a className="inline-flex items-center gap-2 text-xs font-medium p-3" href="https://wa.me/917568896804" target="_blank" rel="noopener noreferrer"><Headphones size={18}/>Contact on WhatsApp<ExternalLink size={12}/></a>
+      <a className="inline-flex items-center gap-2 text-xs font-medium p-3" href="https://wa.me/917568968704" target="_blank" rel="noopener noreferrer"><Headphones size={18}/>Contact on WhatsApp<ExternalLink size={12}/></a>
       <p className="text-xs text-muted-foreground px-3 leading-6">This form is not monitored continuously. For urgent help, call directly. Please do not send medical records or identity documents through this form.</p>
     </div>
     <div>{reference ? <div role="status" className="bg-heal-soft p-6 rounded-xl"><CheckCircle2 className="mb-3"/><h3 className="text-xl">Your request has been received.</h3><p className="text-xs mt-3 break-all">Reference: {reference}</p><p className="text-xs leading-6 mt-2">Our team can review your request. This does not confirm an appointment or ambulance dispatch.</p><Button variant="heal" className="mt-4" onClick={() => { setReference(''); setId(crypto.randomUUID()); }}>Send another request</Button></div> :

@@ -1,43 +1,43 @@
 # The House of Doctor
 
-Single-page NGO website for rural healthcare across Mewar, built with React, TypeScript and TanStack Start. Railway runs the Node/Nitro application. Supabase stores private assistance requests and donation records; Razorpay handles hosted payment checkout.
+Doctor-led rural healthcare NGO website. A single React/TanStack Start landing route, deployed from **main** to Railway using the included Node Dockerfile.
 
-**Start here: [First-time setup without PowerShell](FIRST_TIME_SETUP.md).** It covers GitHub Desktop upload, a new Supabase database, Railway, exact variables, Turnstile, Razorpay testing/live activation, Lovable replacement and staff operations.
+## Current release
 
-- [Production review](PRODUCTION_REVIEW.md): architecture, gaps addressed and launch dependencies.
-- [Validation](VALIDATION.md): actual local check results and unverified external integrations.
-- [Database setup](supabase/production.sql): apply to a staging Supabase project first.
-- [Verify database setup](supabase/verify-setup.sql): run after setup; expect PASS.
-- [Environment template](.env.example): variable names only; never commit real secrets.
-- [Original design brief](docs/ORIGINAL_BRIEF.md): preserved reference; deployment and payment behaviour are governed by the current code and deployment guide.
+- Assistance submissions protected by Cloudflare Turnstile, server validation and insert-only Supabase RLS.
+- Cashfree-hosted donations with deterministic orders, status recovery, signed webhooks and verified refunds.
+- Contact phone: **+91 75689 68704**; email: **houseofdoctorsngo@gmail.com**.
+- Photo/video gallery ready for approved media; real field files still need to be supplied.
+- Private operations through Supabase and Cashfree dashboards. No website admin login, automatic email/SMS alerts or automatic official tax receipts.
 
-## Local commands
+## Start here
 
-Use current Node 22 LTS (22.23.4 or newer Node 22) and npm 12.2.2.
+| Document | Purpose |
+| --- | --- |
+| [FIRST_TIME_SETUP.md](FIRST_TIME_SETUP.md) | Exact Railway variables, existing Supabase/Turnstile setup, Cashfree sandbox and live cutover |
+| [VALIDATION.md](VALIDATION.md) | Current evidence and launch acceptance checklist |
+| [OPERATIONS.md](OPERATIONS.md) | Where requests/donations are viewed, ownership, follow-up and finance procedures |
+| [PROJECT_AUDIT.md](PROJECT_AUDIT.md) | Architecture, website comparison, fixed gaps and remaining launch dependencies |
+| [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md) | Build/deployment/rollback reference |
+| [MEDIA_GUIDE.md](MEDIA_GUIDE.md) | How to add field photographs, videos and captions |
+
+## Development
+
+Use Node 22.23.4 or newer (Docker/CI pin 22.23.4) and npm 12.2.2 for the authoritative lockfile. Copy `.env.example` to `.env.local`, keep real credentials private, then:
 
 ```sh
 npm ci
-cp .env.example .env.local
-# Edit .env.local with staging settings.
 npm run dev
 npm run typecheck
 npm test
 npm run build
 npm run test:production
-npm start
 ```
 
-On Windows use `Copy-Item .env.example .env.local`. Development serves on `http://localhost:3000`. Production reads credentials from the process environment; Railway sets these through Variables. `npm start` runs the production build, not a development or Vite preview server.
+For this Windows checkout, the tested Node runtime is `C:\doc_sin\tooling\node-v22.23.4-win-x64\node.exe`; the globally installed Node can be older. Do not commit local tooling or `.env` files.
 
-## Workflows
+Apply `supabase/production.sql` and then `supabase/verify-setup.sql` in your Supabase SQL Editor before enabling forms/payments. `supabase/operations.sql` contains private read-only staff queries.
 
-- Assistance: validated contact request → human verification → insert-only database permission → private staff review in Supabase Dashboard. No public patient list or website admin password.
-- Donations: server-created order → Razorpay hosted checkout → verified provider status → private record and downloadable payment acknowledgement. Webhooks reconcile completed payments and refunds; browser sessions can resume existing checkouts.
-- Information: accessible accordion navigation, searchable education topics, downloadable general health guide, contact links and on-page policies.
-- Gallery: approved local camp photos configured in `src/lib/gallery.ts`; an honest empty state is displayed until photographs are supplied.
+The site's observed final origin is [www.thehouseofdoctor.in](https://www.thehouseofdoctor.in). Missing credentials deliberately disable transactions. A build or healthcheck is not proof of a real donation, database submission or bank settlement.
 
-Payments fail closed when provider configuration is absent. Test transactions are labelled. A payment acknowledgement is **not** an official donation receipt, settlement statement or tax certificate. Official receipts follow NGO reconciliation and verified settlement.
-
-The application requires operator-owned Supabase, Railway, Turnstile and approved Razorpay accounts. It does not automatically send email receipts or assistance notifications. Review incoming requests in the dashboard and confirm operational/policy claims before launch.
-
-This repository remains connected to Lovable. Preserve published Git history and review a working branch before merging to the connected branch.
+`docs/ORIGINAL_BRIEF.md`, `docs/original-bun.lock` and `.lovable/` retain historical material. Current setup docs and npm lockfile supersede their implementation instructions. Preserve published Git history; do not force-push a Lovable-connected branch.

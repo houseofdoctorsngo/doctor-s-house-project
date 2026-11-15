@@ -3,7 +3,7 @@ import { z } from "zod";
 export const donationPresets = [500, 1000, 5000] as const;
 export const defaultDonation = 1000;
 export const formatINR = (amount: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount);
-export const assistanceTypes = ["Free camp", "Medicines", "Doctor consultation", "Ambulance", "Government schemes"] as const;
+export const assistanceTypes = ["Free camp", "Medicines", "Doctor consultation", "Ambulance", "Government schemes", "Patient support", "Other"] as const;
 export const normalizeIndianPhone = (phone: string) => phone.replace(/\s/g, '').replace(/^\+91/, '');
 export const assistanceSchema = z.object({
   name: z.string().trim().min(2).max(100),

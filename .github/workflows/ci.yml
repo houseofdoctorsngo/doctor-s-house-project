@@ -2,11 +2,16 @@ name: Validate website
 on:
   push:
   pull_request:
+  workflow_dispatch:
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,5 +25,7 @@ jobs:
       - run: npm test
       - run: npm run build
         env:
-          VITE_SITE_URL: https://example.org
+          VITE_SITE_URL: https://www.thehouseofdoctor.in
       - run: npm run test:production
+      - name: Validate Railway Docker image
+        run: docker build --build-arg VITE_SITE_URL=https://www.thehouseofdoctor.in -t house-of-doctor:ci .
