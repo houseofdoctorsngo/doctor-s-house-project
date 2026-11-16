@@ -2,7 +2,11 @@
 
 Updated 16 November 2026. This supersedes prior Razorpay test counts and temporary-branch instructions. Follow FIRST_TIME_SETUP.md before checking remote providers.
 
-## Evidence from this change
+## Lovable presentation restoration, 16 November 2026
+
+All 87 tests passed across 12 files in a single run. The gallery tests exercise a full rotation every six four-second steps, including the idle video panel, playback protection, manual controls, focus pause and reduced motion. The navigation tests verify section order, the mobile menu, policy links and direct links to supplemental sections. The server-rendered Hero, About, Services and footer text matched the retrieved Lovable page after accounting for the current phone number. All six panels and every internal link target were present. A fresh visual screenshot comparison is still unverified. See [the source and commit comparison](docs/REFERENCE_RESTORATION.md).
+
+## Original Cashfree release evidence
 
 - Final TypeScript typecheck: **passed**.
 - Final unit/integration/browser-component suite: **81 passed across 11 files**, run with `vitest run --maxWorkers=2`. The unrestricted two-worker rerun resolved sandbox worker-start timeouts; no failed assertions remained.

@@ -1,5 +1,7 @@
 # Project audit and release plan
 
+**Follow-up:** The owner's field media is now supplied. The subsequent published-Lovable presentation restoration and the effect of October/November commits are recorded in [docs/REFERENCE_RESTORATION.md](docs/REFERENCE_RESTORATION.md). The findings below describe the original Cashfree audit baseline, not the restored presentation.
+
 Audit dates: 15-16 November 2026. Baseline: main `9cd24bc`. Scope: repository inventory, public application/server/data/deployment flows, current public website and the supplied Lovable reference. This is a code and workflow review, not a medical-content certification or a claim that unconfigured provider accounts were tested.
 
 ## Current stage

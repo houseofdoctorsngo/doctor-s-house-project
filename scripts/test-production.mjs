@@ -26,7 +26,13 @@ try {
   assert.ok(ready, `Production server did not start: ${output}`);
   const page = await fetch(origin); const html = await page.text();
   assert.equal(page.status, 200);
-  assert.ok(html.includes('The House of Doctor') && html.includes('Fund a camp. Save a life.'));
+  assert.ok(html.includes('The House of Doctor') && html.includes('A house built on healing.') && html.includes('Support Our Mission'));
+  const sections = ['home', 'about', 'services', 'gallery', 'help-desk', 'donate', 'mewar-connect', 'focus', 'library', 'publications'];
+  const positions = sections.map(id => html.indexOf(`id="${id}"`));
+  assert.ok(positions.every(position => position >= 0));
+  assert.deepEqual(positions, [...positions].sort((a, b) => a - b));
+  assert.ok(html.includes('carousel-3d') && html.includes('translateZ(280px)'));
+  assert.ok(!html.includes('name="card_number"') && !html.includes('name="cvv"'));
   assert.ok(!html.includes('/__l5e/assets-v1/'));
   assert.equal(page.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(page.headers.get('x-frame-options'), 'DENY');

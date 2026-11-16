@@ -7,7 +7,7 @@ Doctor-led rural healthcare NGO website. A single React/TanStack Start landing r
 - Assistance submissions protected by Cloudflare Turnstile, server validation and insert-only Supabase RLS.
 - Cashfree-hosted donations with deterministic orders, status recovery, signed webhooks and verified refunds.
 - Contact phone: **+91 75689 68704**; email: **houseofdoctorsngo@gmail.com**.
-- Photo/video gallery ready for approved media; real field files still need to be supplied.
+- Published Lovable presentation restored, with the owner's five field photos and video in a 3D rotating gallery.
 - Private operations through Supabase and Cashfree dashboards. No website admin login, automatic email/SMS alerts or automatic official tax receipts.
 
 ## Start here
@@ -20,6 +20,7 @@ Doctor-led rural healthcare NGO website. A single React/TanStack Start landing r
 | [PROJECT_AUDIT.md](PROJECT_AUDIT.md) | Architecture, website comparison, fixed gaps and remaining launch dependencies |
 | [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md) | Build/deployment/rollback reference |
 | [MEDIA_GUIDE.md](MEDIA_GUIDE.md) | How to add field photographs, videos and captions |
+| [docs/REFERENCE_RESTORATION.md](docs/REFERENCE_RESTORATION.md) | Pre-November history, published-reference comparison, restoration plan and operational differences |
 
 ## Development
 

@@ -1,44 +1,40 @@
 import { useEffect, useState } from "react";
 import { Camera, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { Button } from "./ui/button";
 import { galleryPhotos as photos } from "@/lib/gallery";
 
 export function Gallery() {
-  const [active, setActive] = useState(0);
+  const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const [hover, setHover] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [watching, setWatching] = useState(false);
+  const count = photos.length;
+  const active = count ? ((step % count) + count) % count : 0;
   useEffect(() => {
     if (
-      photos.length < 2 ||
-      photos[active]?.kind === "video" ||
+      count < 2 ||
+      watching ||
       paused ||
       hover ||
       focused ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     )
       return;
-    const timer = window.setInterval(() => setActive((index) => (index + 1) % photos.length), 4500);
+    const timer = window.setInterval(() => setStep((value) => value + 1), 4000);
     return () => window.clearInterval(timer);
-  }, [active, paused, hover, focused]);
-  if (!photos.length)
+  }, [active, count, paused, hover, focused, watching]);
+  function move(offset: number) {
+    setWatching(false);
+    setStep((value) => value + offset);
+  }
+  if (!count)
     return (
       <div className="bg-heal-soft rounded-2xl p-7 text-center">
-        <Camera className="mx-auto mb-4" size={32} />
+        <Camera className="mx-auto mb-4" />
         <h3 className="text-xl">From our community, with care</h3>
-        <p className="text-sm text-muted-foreground leading-7 mt-2 max-w-lg mx-auto">
-          Photographs from our camps will be shared here with the permission of the people pictured.
-          To learn more about our work, contact our team or request our impact report below.
-        </p>
-        <a
-          className="inline-block underline text-sm mt-3"
-          href="mailto:houseofdoctorsngo@gmail.com?subject=Camp%20activities%20and%20impact%20report"
-        >
-          Request an update
-        </a>
       </div>
     );
-  const photo = photos[active]!;
+  const angle = 360 / count;
   return (
     <div
       role="region"
@@ -51,108 +47,134 @@ export function Gallery() {
         if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
       }}
     >
-      <figure className="rounded-2xl overflow-hidden gold-ring bg-heal-soft">
-        {photo.kind === "video" ? (
-          <video
-            key={photo.src}
-            controls
-            playsInline
-            preload="none"
-            poster={photo.poster}
-            aria-label={photo.alt}
-            className="w-full max-h-96"
-          >
-            <source src={photo.src} />
-            {photo.captions && (
-              <track kind="captions" src={photo.captions} srcLang="en" label="English" default />
-            )}
-            Your browser cannot play this video. <a href={photo.src}>Download video</a>
-          </video>
-        ) : (
-          <img
-            src={photo.src}
-            alt={photo.alt}
-            width={photo.width ?? 1200}
-            height={photo.height ?? 800}
-            loading="lazy"
-            className="w-full max-h-96 object-contain"
-          />
-        )}
-        <figcaption className="p-4 text-sm">
-          <strong>{photo.title}</strong>
-          <span className="block text-xs text-muted-foreground mt-1">{photo.credit}</span>
-          {photo.transcript && (
-            <details className="mt-3">
-              <summary>Video description and transcript</summary>
-              <p className="mt-2 whitespace-pre-line">{photo.transcript}</p>
-            </details>
-          )}
-        </figcaption>
-      </figure>
-      <div
-        className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4"
-        aria-label="Choose a field moment"
-      >
-        {photos.map((item, index) => (
-          <button
-            key={item.src}
-            type="button"
-            aria-label={`Show ${item.title}`}
-            aria-pressed={active === index}
-            onClick={() => setActive(index)}
-            className={`relative overflow-hidden rounded-lg border-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${active === index ? "border-gold-deep" : "border-transparent"}`}
-          >
-            {item.kind !== "video" || item.poster ? (
-              <img
-                src={item.poster ?? item.src}
-                alt=""
-                loading="lazy"
-                width={160}
-                height={96}
-                className="w-full h-16 sm:h-20 object-cover"
-              />
-            ) : (
-              <span className="block h-16 sm:h-20 bg-heal-soft" />
-            )}
-            {item.kind === "video" && (
-              <span className="absolute inset-0 flex items-center justify-center bg-black/25 text-white">
-                <Play aria-hidden="true" fill="currentColor" size={24} />
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-      {photos.length > 1 && (
-        <div className="flex gap-3 justify-center items-center mt-4">
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Previous photo"
-            onClick={() => setActive((index) => (index - 1 + photos.length) % photos.length)}
-          >
-            <ChevronLeft />
-          </Button>
-          <span className="text-xs">
-            {active + 1} / {photos.length}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Next photo"
-            onClick={() => setActive((index) => (index + 1) % photos.length)}
-          >
-            <ChevronRight />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={paused ? "Play gallery" : "Pause gallery"}
-            onClick={() => setPaused((value) => !value)}
-          >
-            {paused ? <Play /> : <Pause />}
-          </Button>
+      <div className="relative rounded-[2.5rem] bg-[image:var(--gradient-gold)] p-[2px] shadow-[var(--shadow-3d)]">
+        <div className="rounded-[2.4rem] bg-card p-6 sm:p-10">
+          <div className="reference-gallery relative mx-auto w-full">
+            <div
+              className="carousel-3d relative"
+              data-testid="gallery-rotor"
+              style={{ transform: `rotateY(${-step * angle}deg)` }}
+            >
+              {photos.map((photo, index) => {
+                const selected = index === active;
+                return (
+                  <figure
+                    key={photo.src}
+                    className="carousel-face absolute inset-0 overflow-hidden rounded-2xl bg-primary shadow-[var(--shadow-3d)] ring-1 ring-[var(--gold)]/40"
+                    aria-hidden={!selected}
+                    inert={!selected}
+                    style={{
+                      transform: `rotateY(${index * angle}deg) translateZ(280px)`,
+                      opacity: selected ? 1 : 0.55,
+                      filter: selected ? "none" : "brightness(0.85) saturate(0.9)",
+                    }}
+                  >
+                    {photo.kind === "video" && selected ? (
+                      <video
+                        key={photo.src}
+                        controls
+                        playsInline
+                        onPlay={() => setWatching(true)}
+                        onEnded={() => setWatching(false)}
+                        preload="none"
+                        poster={photo.poster}
+                        aria-label={photo.alt}
+                        className="absolute inset-x-0 top-0 h-[calc(100%-80px)] w-full object-contain"
+                      >
+                        <source src={photo.src} type="video/mp4" />
+                        {photo.captions && (
+                          <track
+                            kind="captions"
+                            src={photo.captions}
+                            srcLang="en"
+                            label="English"
+                            default
+                          />
+                        )}
+                        Your browser cannot play this video. <a href={photo.src}>Download video</a>
+                      </video>
+                    ) : photo.kind !== "video" || photo.poster ? (
+                      <img
+                        src={photo.poster ?? photo.src}
+                        alt={photo.alt}
+                        width={photo.width ?? 1280}
+                        height={photo.height ?? 720}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Camera className="m-auto h-full w-20 text-primary-foreground" />
+                    )}
+                    <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-4">
+                      <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
+                        {photo.tag}
+                      </span>
+                      <span className="rounded-full bg-[image:var(--gradient-gold)] px-2.5 py-1 text-[10px] font-bold text-primary shadow-sm">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <figcaption
+                      className={`pointer-events-none absolute inset-x-0 bottom-0 p-5 text-primary-foreground ${photo.kind === "video" ? "h-20 bg-primary" : "bg-gradient-to-t from-primary/90 via-primary/50 to-transparent"}`}
+                    >
+                      <strong className="font-display text-lg font-semibold sm:text-xl">
+                        {photo.title}
+                      </strong>
+                      <span className="mt-1 block text-xs text-primary-foreground/80">
+                        {photo.credit}
+                      </span>
+                    </figcaption>
+                  </figure>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+            <button
+              type="button"
+              className="gallery-control"
+              aria-label="Previous photo"
+              onClick={() => move(-1)}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-1">
+              {photos.map((photo, index) => (
+                <button
+                  key={photo.src}
+                  type="button"
+                  className="gallery-position"
+                  aria-label={`Go to slide ${index + 1}`}
+                  aria-pressed={active === index}
+                  onClick={() => {
+                    if (index !== active) move(index - active);
+                  }}
+                >
+                  <span />
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="gallery-control"
+              aria-label="Next photo"
+              onClick={() => move(1)}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              className="gallery-control"
+              aria-label={paused ? "Play gallery" : "Pause gallery"}
+              onClick={() => setPaused((value) => !value)}
+            >
+              {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+            </button>
+          </div>
+          <p className="sr-only" aria-live={paused || focused ? "polite" : "off"}>
+            {active + 1} / {count}: {photos[active]?.title}
+          </p>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 # Field photos and videos
 
-On 16 November 2026, the owner supplied five photographs and one video and requested publication in Moments from the field. All six are included in `src/lib/gallery.ts`, with descriptive captions and direct thumbnail selection. Dates and locations have not been inferred from filenames.
+On 16 November 2026, the owner supplied five photographs and one video and requested publication in Moments from the field. All six are included in `src/lib/gallery.ts`. The follow-up reference restoration uses the published Lovable site's 3D rotation, category/number badges and dot navigation. Visible captions use generic labels already on that reference; no event date, specific village or clinical claim is inferred from a filename.
 
-The photos are web-sized JPEG copies (maximum 1600px on the longer edge, no copied EXIF metadata). Original framing is retained. The supplied 30.85-second H.264 MP4 is included unchanged (about 9.3 MB), with a poster from its first second and a visual description. No spoken-audio transcript has been claimed. Original banners visible within the media may contain historical contact numbers; the site's current contact remains +91 75689 68704.
+The photos are web-sized JPEG copies (maximum 1600px on the longer edge, no copied EXIF metadata). Asset framing is retained; the gallery uses cover framing to fill the reference's rotating panels. The supplied 30.85-second H.264 MP4 is included unchanged (about 9.3 MB), with a poster from its first second. No spoken-audio transcript has been claimed. Original banners visible within the media may contain historical contact numbers; the site's current contact remains +91 75689 68704.
 
 | Supplied file | Website file |
 | --- | --- |
@@ -30,6 +30,6 @@ export const galleryPhotos: GalleryPhoto[] = [
 
 These filenames are examples, not existing assets. Do not add entries until the files exist.
 
-Videos use native playback controls, inline mobile playback and no autoplay/download until requested (`preload=none`). The carousel does not advance while a video is selected; navigating away removes that player. Photos pause on hover/focus and respect reduced-motion preferences. Verify previous/next, captions, video sound and portrait/landscape layout after adding the real files.
+Videos use native playback controls, inline mobile playback and no autoplay/download until requested (`preload=none`). An idle video poster rotates with the photos. Starting playback holds the video in place. Navigating away removes the player. Photos pause on hover/focus and respect reduced-motion preferences. Verify previous/next, captions, video sound and portrait/landscape layout after adding the real files.
 
 Approved annual impact reports/proposals can later replace email-request buttons with real PDF links. Do not create fictional reports or financial/registration claims to fill placeholders.

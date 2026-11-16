@@ -27,7 +27,7 @@ it("shows an honest empty state when no field media is supplied", () => {
   ).toBeInTheDocument();
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
 });
-it("never advances away from a video or autoplays it", () => {
+it("never autoplays the video or advances while a visitor watches it", () => {
   media.items = [
     {
       kind: "video",
@@ -44,6 +44,7 @@ it("never advances away from a video or autoplays it", () => {
   expect(video).toHaveAttribute("controls");
   expect(video).toHaveAttribute("preload", "none");
   expect(video).not.toHaveAttribute("autoplay");
+  fireEvent.play(video);
   act(() => vi.advanceTimersByTime(20000));
   expect(video).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Next photo" }));
@@ -62,4 +63,66 @@ it("respects the photo pause control", () => {
   fireEvent.click(screen.getByRole("button", { name: "Play gallery" }));
   act(() => vi.advanceTimersByTime(4500));
   expect(screen.getByRole("img", { name: "Second camp" })).toBeInTheDocument();
+});
+
+it("rotates every four seconds and continues forward across the last panel", () => {
+  media.items = Array.from({ length: 6 }, (_, index) => ({
+    src: `/${index}.jpg`,
+    alt: `Camp ${index}`,
+    title: `Camp ${index}`,
+    credit: "Test fixture",
+  }));
+  media.items[5] = {
+    kind: "video",
+    src: "/camp.mp4",
+    alt: "Camp film",
+    title: "Camp",
+    credit: "Team",
+  };
+  render(<Gallery />);
+  act(() => vi.advanceTimersByTime(3999));
+  expect(screen.getByRole("button", { name: "Go to slide 1" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  act(() => vi.advanceTimersByTime(1));
+  expect(screen.getByRole("button", { name: "Go to slide 2" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  for (let tick = 0; tick < 5; tick++) act(() => vi.advanceTimersByTime(4000));
+  expect(screen.getByTestId("gallery-rotor")).toHaveStyle({ transform: "rotateY(-360deg)" });
+  expect(screen.getByRole("button", { name: "Go to slide 1" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+
+it("pauses on keyboard focus and keeps inactive faces out of interaction", () => {
+  media.items = [
+    { src: "/one.jpg", alt: "First", title: "First", credit: "Test fixture" },
+    { src: "/two.jpg", alt: "Second", title: "Second", credit: "Test fixture" },
+  ];
+  const { container } = render(<Gallery />);
+  fireEvent.focus(screen.getByRole("button", { name: "Next photo" }));
+  act(() => vi.advanceTimersByTime(12000));
+  expect(screen.getByRole("button", { name: "Go to slide 1" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  expect(container.querySelector('figure[aria-hidden="true"]')).toHaveAttribute("inert");
+});
+
+it("does not start automatic rotation for reduced motion", () => {
+  vi.stubGlobal("matchMedia", () => ({ matches: true }));
+  media.items = [
+    { src: "/one.jpg", alt: "First", title: "First", credit: "Test fixture" },
+    { src: "/two.jpg", alt: "Second", title: "Second", credit: "Test fixture" },
+  ];
+  render(<Gallery />);
+  act(() => vi.advanceTimersByTime(12000));
+  expect(screen.getByRole("button", { name: "Go to slide 1" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 });

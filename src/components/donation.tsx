@@ -227,21 +227,19 @@ export function Donation() {
     pdf.save(`THD-${result.id}-acknowledgement.pdf`);
   }
   return (
-    <section id="donate" className="site-width py-8">
-      <p className="eyebrow text-destructive">
-        <Heart size={12} /> A LITTLE HELP. A LASTING IMPACT.
-      </p>
-      <h2 className="section-title gold-text mt-2">Fund a camp. Save a life.</h2>
-      <p className="mt-3 text-sm text-muted-foreground">
-        Support medical camps, medicines and care for rural communities across Mewar.
-      </p>
-      <div className="grid md:grid-cols-2 gap-5 mt-5">
-        <div className="card-3d p-6">
-          <span className="icon-badge mb-3">
-            <Heart />
-          </span>
-          <h3 className="text-xl mb-4">Choose your contribution</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <section id="donate" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+      <div className="text-center">
+        <p className="text-xs font-semibold uppercase tracking-widest text-destructive">Give</p>
+        <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Support Our Mission</h2>
+        <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+          Every contribution helps us run one more camp, hand out one more strip of medicine, and
+          reach one more village.
+        </p>
+      </div>
+      <div className="mt-12 grid gap-8 lg:grid-cols-2">
+        <div className="card-3d rounded-3xl p-6 sm:p-8">
+          <h3 className="text-xl mb-4">Choose an amount</h3>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[...donationPresets, "Custom"].map((value) => (
               <Button
                 key={value}
@@ -270,6 +268,22 @@ export function Donation() {
               />
             </label>
           )}
+          <h3 className="mt-8 text-lg font-semibold">Payment method</h3>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {[
+              { name: "Card", sub: "Credit / Debit" },
+              { name: "UPI", sub: "GPay / PhonePe" },
+              { name: "Bank", sub: "Netbanking" },
+            ].map((method) => (
+              <div
+                key={method.name}
+                className="rounded-xl border-2 border-border bg-card px-3 py-4 text-center"
+              >
+                <div className="text-sm font-semibold">{method.name}</div>
+                <div className="mt-0.5 text-[11px] text-muted-foreground">{method.sub}</div>
+              </div>
+            ))}
+          </div>
           <div className="bg-heal-soft rounded-xl p-4 mt-5 text-sm leading-7">
             <ShieldCheck className="mb-2" />
             <p>
@@ -290,7 +304,7 @@ export function Donation() {
             </a>
           </p>
         </div>
-        <div className="card-3d p-6">
+        <div className="card-3d rounded-3xl p-6 sm:p-8">
           {config?.paymentsMode === "test" && (
             <p role="status" className="bg-heal-soft p-3 rounded-lg text-sm mb-4">
               Test mode — no real donation is collected.
@@ -398,8 +412,8 @@ export function Donation() {
             </div>
           ) : (
             <form onSubmit={submit}>
-              <h3 className="text-xl mb-4">A gift from you. Hope for someone.</h3>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <h3 className="text-xl mb-4">Payment Details</h3>
+              <div className="mt-5 grid gap-4">
                 <label>
                   <span className="field-label">Full name</span>
                   <input
@@ -422,7 +436,7 @@ export function Donation() {
                     maxLength={255}
                   />
                 </label>
-                <label className="sm:col-span-2">
+                <label className="block">
                   <span className="field-label">Mobile number</span>
                   <input
                     name="phone"
