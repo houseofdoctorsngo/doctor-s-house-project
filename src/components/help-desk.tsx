@@ -10,10 +10,10 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { HumanVerification } from "./human-verification";
-import { assistanceSchema, assistanceTypes } from "@/lib/ngo";
+import { assistanceSchema, assistanceTypes, type MewarTopic } from "@/lib/ngo";
 import { api, type PublicConfig } from "@/lib/api";
 
-export function HelpDesk() {
+export function HelpDesk({ enquiry }: { enquiry?: MewarTopic }) {
   const [config, setConfig] = useState<PublicConfig | null>(null);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -60,71 +60,73 @@ export function HelpDesk() {
     }
   }
   return (
-    <div className="reference-help grid gap-10 lg:grid-cols-2">
-      <div>
-        <span className="text-xs font-semibold uppercase tracking-widest text-destructive">
-          Get In Touch
-        </span>
-        <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
-          We're here whenever you need us.
-        </h2>
-        <p className="mt-4 text-muted-foreground">
-          Reach our team directly — for camp requests, patient help or volunteering opportunities.
-        </p>
-        <div className="mt-8 space-y-4">
-          <a href="tel:+917568968704" className="card-3d flex items-center gap-4 rounded-2xl p-5">
-            <span className="icon-badge bg-card">
-              <Phone />
-            </span>
-            <span>
-              <span className="text-xs text-muted-foreground block">Call Us</span>
-              <strong className="text-base">+91 75689 68704</strong>
-            </span>
-            <ArrowRight size={17} className="ml-auto" />
-          </a>
-          <a
-            href="mailto:houseofdoctorsngo@gmail.com"
-            className="card-3d flex items-center gap-4 rounded-2xl p-5"
-          >
-            <span className="icon-badge">
-              <Mail />
-            </span>
-            <span>
-              <span className="block text-xs uppercase text-muted-foreground">Email Us</span>
-              <span className="font-semibold break-all">houseofdoctorsngo@gmail.com</span>
-            </span>
-          </a>
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=Udaipur%2C%20Rajasthan%2C%20India"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="card-3d flex items-center gap-4 rounded-2xl p-5"
-          >
-            <span className="icon-badge">
-              <MapPin />
-            </span>
-            <span>
-              <span className="block text-xs uppercase text-muted-foreground">Location</span>
-              <span className="font-semibold">Udaipur, Rajasthan, India</span>
-            </span>
-            <ExternalLink size={14} />
-          </a>
-          <a
-            className="btn-heal inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-semibold sm:w-auto"
-            href="https://wa.me/917568968704"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Headphones size={18} />
-            Chat with Support
-            <ExternalLink size={12} />
-          </a>
-          <p className="text-xs text-muted-foreground px-3 leading-6">
-            This form is not monitored continuously. For urgent help, call directly. Please do not
-            send medical records or identity documents through this form.
+    <div className={enquiry ? "mt-5" : "reference-help grid gap-10 lg:grid-cols-2"}>
+      {!enquiry && (
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-widest text-destructive">
+            Get In Touch
+          </span>
+          <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
+            We're here whenever you need us.
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Reach our team directly — for camp requests, patient help or volunteering opportunities.
           </p>
+          <div className="mt-8 space-y-4">
+            <a href="tel:+917568968704" className="card-3d flex items-center gap-4 rounded-2xl p-5">
+              <span className="icon-badge bg-card">
+                <Phone />
+              </span>
+              <span>
+                <span className="text-xs text-muted-foreground block">Call Us</span>
+                <strong className="text-base">+91 75689 68704</strong>
+              </span>
+              <ArrowRight size={17} className="ml-auto" />
+            </a>
+            <a
+              href="mailto:houseofdoctorsngo@gmail.com"
+              className="card-3d flex items-center gap-4 rounded-2xl p-5"
+            >
+              <span className="icon-badge">
+                <Mail />
+              </span>
+              <span>
+                <span className="block text-xs uppercase text-muted-foreground">Email Us</span>
+                <span className="font-semibold break-all">houseofdoctorsngo@gmail.com</span>
+              </span>
+            </a>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Udaipur%2C%20Rajasthan%2C%20India"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-3d flex items-center gap-4 rounded-2xl p-5"
+            >
+              <span className="icon-badge">
+                <MapPin />
+              </span>
+              <span>
+                <span className="block text-xs uppercase text-muted-foreground">Location</span>
+                <span className="font-semibold">Udaipur, Rajasthan, India</span>
+              </span>
+              <ExternalLink size={14} />
+            </a>
+            <a
+              className="btn-heal inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-semibold sm:w-auto"
+              href="https://wa.me/917568968704"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Headphones size={18} />
+              Chat with Support
+              <ExternalLink size={12} />
+            </a>
+            <p className="text-xs text-muted-foreground px-3 leading-6">
+              This form is not monitored continuously. For urgent help, call directly. Please do not
+              send medical records or identity documents through this form.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
       <div className="card-3d rounded-3xl p-6 sm:p-8">
         {reference ? (
           <div role="status" className="bg-heal-soft p-6 rounded-xl">
@@ -132,8 +134,9 @@ export function HelpDesk() {
             <h3 className="text-xl">Your request has been received.</h3>
             <p className="text-xs mt-3 break-all">Reference: {reference}</p>
             <p className="text-xs leading-6 mt-2">
-              Our team can review your request. This does not confirm an appointment or ambulance
-              dispatch.
+              {enquiry
+                ? "Our partnerships team can now follow up on your enquiry."
+                : "Our team can review your request. This does not confirm an appointment or ambulance dispatch."}
             </p>
             <Button
               variant="heal"
@@ -148,7 +151,9 @@ export function HelpDesk() {
           </div>
         ) : (
           <form onSubmit={submit}>
-            <h3 className="text-xl mb-4">Request Assistance</h3>
+            <h3 className="text-xl mb-4">
+              {enquiry ? enquiry + " enquiry" : "Request Assistance"}
+            </h3>
             <div className="mt-6 space-y-4">
               <label className="block">
                 <span className="field-label">Full Name</span>
@@ -185,26 +190,30 @@ export function HelpDesk() {
                   className="field"
                 />
               </label>
-              <label className="block">
-                <span className="field-label">Type of Medical Assistance Needed</span>
-                <select name="assistance_type" className="field">
-                  {assistanceTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {
+              {enquiry ? (
+                <input type="hidden" name="assistance_type" value={enquiry} />
+              ) : (
+                <label className="block">
+                  <span className="field-label">Type of Medical Assistance Needed</span>
+                  <select name="assistance_type" className="field">
+                    {assistanceTypes.map((type) => (
+                      <option key={type} value={type}>
                         {
-                          "Free camp": "Free Medical Camp Request",
-                          Medicines: "Free Medicine",
-                          "Doctor consultation": "Doctor Consultation / Prescription",
-                          "Patient support": "Patient Support",
-                          Other: "Other",
-                          Ambulance: "Ambulance",
-                          "Government schemes": "Government schemes",
-                        }[type]
-                      }
-                    </option>
-                  ))}
-                </select>
-              </label>
+                          {
+                            "Free camp": "Free Medical Camp Request",
+                            Medicines: "Free Medicine",
+                            "Doctor consultation": "Doctor Consultation / Prescription",
+                            "Patient support": "Patient Support",
+                            Other: "Other",
+                            Ambulance: "Ambulance",
+                            "Government schemes": "Government schemes",
+                          }[type]
+                        }
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </div>
             <label className="hidden" aria-hidden="true">
               Website

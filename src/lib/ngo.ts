@@ -8,6 +8,8 @@ export const formatINR = (amount: number) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(amount);
+export const mewarTopics = ["Asset lease", "Hospital management", "Medical staff", "Camp volunteering", "Camp funding"] as const;
+export type MewarTopic = (typeof mewarTopics)[number];
 export const assistanceTypes = [
   "Free camp",
   "Medicines",
@@ -26,7 +28,7 @@ export const assistanceSchema = z.object({
     .trim()
     .regex(/^(\+91 ?)?[6-9]\d{9}$/, "Enter a valid Indian mobile number"),
   village: z.string().trim().min(2).max(120),
-  assistance_type: z.enum(assistanceTypes),
+  assistance_type: z.enum([...assistanceTypes, ...mewarTopics]),
 });
 export const donorSchema = z.object({
   name: z.string().trim().min(2).max(100),

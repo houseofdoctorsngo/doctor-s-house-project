@@ -294,6 +294,18 @@ export async function handleApi(request: Request): Promise<Response | null> {
   if (!path.startsWith("/api/")) return null;
   try {
     if (path === "/api/health" && request.method === "GET") return json({ status: "ok" });
+    if (path === "/api/staff/config" && request.method === "GET") {
+      const url = env("SUPABASE_URL");
+      const key = env("SUPABASE_PUBLISHABLE_KEY");
+      let publicKey = /^sb_publishable_[A-Za-z0-9_-]+$/.test(key);
+      if (!publicKey && key.split(".").length === 3) {
+        try {
+          publicKey = JSON.parse(Buffer.from(key.split(".")[1]!, "base64url").toString()).role === "anon";
+        } catch { /* Unrecognised keys stay server-side. */ }
+      }
+      if (!url || !publicKey || key === secretKey()) return json({ error: "Staff sign-in awaits Supabase setup." }, 503);
+      return json({ url, key });
+    }
     if (path === "/api/config" && request.method === "GET")
       return json({
         paymentsMode: formsReady() ? mode() : "disabled",

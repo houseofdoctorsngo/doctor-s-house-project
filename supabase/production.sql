@@ -15,7 +15,7 @@ ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS staff_notes text
 -- Do not backfill consent timestamps for historical records.
 ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS consent_at timestamptz;
 ALTER TABLE public.assistance_requests DROP CONSTRAINT IF EXISTS assistance_requests_assistance_type_check;
-ALTER TABLE public.assistance_requests ADD CONSTRAINT assistance_requests_assistance_type_check CHECK (assistance_type IN ('Free camp','Medicines','Doctor consultation','Ambulance','Government schemes','Patient support','Other'));
+ALTER TABLE public.assistance_requests ADD CONSTRAINT assistance_requests_assistance_type_check CHECK (assistance_type IN ('Free camp','Medicines','Doctor consultation','Ambulance','Government schemes','Patient support','Other','Asset lease','Hospital management','Medical staff','Camp volunteering','Camp funding'));
 ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS assigned_to text;
 ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS follow_up_at timestamptz;
 CREATE INDEX IF NOT EXISTS assistance_queue_idx ON public.assistance_requests(status, follow_up_at, created_at);

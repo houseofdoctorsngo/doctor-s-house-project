@@ -54,7 +54,7 @@ Both sites were opened in a browser during this audit. `thehouseofdoctor.in` red
 | --- | --- | --- |
 | Identity, services, contact | Doctor-led NGO, Udaipur, rural/tribal services, old phone | Retained current branding; updated every active contact, tel/WhatsApp, PDF and structured-data number |
 | Navigation | Home/About/Services/Gallery/Help Desk anchors | Current accordion design retained; added Focus Areas and Health Library links; legacy `#helpdesk` resolves to current help desk |
-| Patient support | Explicit support service and form option | Added Patient support and Other form options; referral/follow-up narrative already exists in Mewar Connect |
+| Patient support | Explicit support service and form option | The Help Desk includes Patient support and Other. Mewar Connect handles partnership and volunteering enquiries. |
 | Gallery | Six labelled placeholder frames and instruction to add photos | No real missing photos could be recovered; prepared image/video playback and truthful empty state, awaiting supplied files |
 | Donation | Card number, expiry and CVV fields displayed on the site; no real transaction tested | Kept sensitive payment fields at provider; replaced Razorpay with Cashfree hosted checkout and server verification |
 | Donation amounts | Several different presets | Retained repository's specified INR 500 / 1000 / 5000 + custom; custom supports other amounts |
@@ -105,7 +105,7 @@ The legacy site should not continue collecting enquiries or displaying old conta
 | Launch gate | Staff coverage / mailbox monitoring | NGO manager: assign coordinator/backup, finance and office owners; use OPERATIONS |
 | Content pending | Field photos/videos and official reports | Owner: supply approved files/captions; MEDIA_GUIDE describes publication |
 | Content approval | Inherited registered-NGO, hospital, 24x7 ambulance and health guidance claims | NGO leadership/clinician: confirm factual availability and approve wording; code audit is not independent verification |
-| Operational limitation | No automatic request alerts/custom staff portal | Use privileged provider dashboards with a staffed rota; scope authenticated portal/notification service if needed |
+| Staff operations update | The private staff workspace shows requests and donation records | Staff monitor the queue during their rota. Cashfree remains the reconciliation source. |
 | Operational limitation | No automated bank settlement, dispute or tax-certificate workflow | Finance dashboard and bank reconciliation, private ledger notes; no fabricated settled/80G status |
 | Reliability | Healthcheck checks process only, not services; webhook retry window is finite | Monitor provider logs and unresolved rows; replay failed events and investigate exceptions |
 | Release controls | Railway Wait for CI and actual live variables not inspected | Owner checks dashboard; code contains CI but cannot enable Railway settings by itself |

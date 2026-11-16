@@ -102,13 +102,32 @@ Interrupted orders retain a random access token in the same browser tab's sessio
 
 ## 7. Daily operation and media
 
-Read [OPERATIONS.md](OPERATIONS.md) for who reviews each channel, request filters, finance reconciliation and incident handling. There is no website `/admin` page and no automatic email/SMS alert integration; assign a dashboard-monitoring rota before enabling the form. Supabase and Cashfree dashboards are the private operator tools.
+Read [OPERATIONS.md](OPERATIONS.md) for routing, reconciliation and incident handling. Staff can review online requests and payment records at `/staff`. Assign someone to check the queue during staffed hours.
 
 Read [MEDIA_GUIDE.md](MEDIA_GUIDE.md) for the five owner-supplied field photos and video added on 16 November 2026, and for future media additions. Annual reports and the partnership proposal remain email-request links until approved documents exist.
 
 Enable Railway **Wait for CI** after the GitHub Actions workflow passes. Railway code rollback does not roll back database records. Stop conflicting Lovable publishing after cutover; never force-push connected Git history.
 
+## 8. Activate the private staff workspace
+
+1. In the Supabase SQL Editor, apply the current [production.sql](supabase/production.sql) so Mewar Connect interests are accepted. Run [verify-setup.sql](supabase/verify-setup.sql), then [staff.sql](supabase/staff.sql). The latter publishes only a one-row change signal to Supabase Realtime.
+2. Set Railway runtime variables `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` from this same project and redeploy. These enable sign-in. The submission and Cashfree variables in the earlier steps enable new records. Never put a staff password in a Railway build variable.
+3. In Supabase **Authentication → Users → Add user → Create new user**, create the initial operator. Suggested first login is `houseofdoctorsngo@gmail.com`. Use a unique temporary password from your password manager and confirm the email for this owner-controlled mailbox. If it already exists, verify ownership and use the existing account or reset its password. Copy the user's UUID from the Users screen.
+4. In the SQL Editor, replace the example UUID with that verified user's UUID and execute:
+
+   ```sql
+   INSERT INTO ngo_private.staff_members (user_id)
+   VALUES ('00000000-0000-0000-0000-000000000000'::uuid)
+   ON CONFLICT DO NOTHING;
+   ```
+
+5. Open [staff sign-in](https://www.thehouseofdoctor.in/staff) directly. Sign in, choose **Change password**, and test the new password after signing out. The login session stays in memory for this tab. Reloading requires sign-in again. Personal accounts for additional operators use the same approval procedure. On a dedicated NGO Auth project you may disable new-user signup in Auth settings.
+6. To revoke access, delete that UUID's row from `ngo_private.staff_members` in the SQL Editor. The next queue read or status change checks membership again. Supabase Authentication remains the place to manage user email or recover a lost password.
+
 ## Official references
+
+- [Supabase password authentication](https://supabase.com/docs/guides/auth/passwords)
+- [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
 
 - [Cashfree hosted web checkout and domain setup](https://www.cashfree.com/docs/payments/online/web/redirect)
 - [Cashfree API orders](https://www.cashfree.com/docs/api-reference/payments/latest/orders/create-order)

@@ -24,6 +24,10 @@ await check('/', async response => {
   if (!html.includes('The House of Doctor')) throw new Error('Missing server-rendered page');
   if (html.includes('/__l5e/assets-v1/')) throw new Error('Non-portable Lovable asset reference');
 });
+await check('/staff', async response => {
+  const html = await response.text();
+  if (!html.includes('Staff sign-in') || !html.includes('noindex')) throw new Error('Missing staff sign-in page');
+});
 await check('/images/ngo-logo.jpeg', async response => { if (!response.headers.get('content-type')?.startsWith('image/')) throw new Error('Logo is not an image'); });
 if (failed) process.exitCode = 1;
 else console.log('Read-only smoke checks passed. Provider integration tests are still required.');

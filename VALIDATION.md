@@ -89,6 +89,12 @@ Do these with real sandbox credentials after automated checks. Check webhook log
 
 ## Live acceptance and operations
 
+- [ ] Apply the staff setup in FIRST_TIME_SETUP.md. Open `/staff` in a private window. It should show only the sign-in form. Confirm that an ordinary Supabase user cannot read either queue or change a request.
+- [ ] Sign in with an approved staff account, change the temporary password, sign out and verify the new password. Keep names, credentials and payment details out of screenshots.
+- [ ] Open Mewar Connect and submit a labelled staging enquiry for camp volunteering. Check its reference and interest in **Requests**. In two signed-in tabs, change its status in one and confirm the other updates automatically. Check the live connection indicator.
+- [ ] Complete a Cashfree sandbox donation. Compare the order ID, transaction ID, gross amount, mode, status and refund amount in **Donations** with the sandbox dashboard. Match settlement and receipt fields only after finance has recorded them.
+- [ ] Remove a staging operator's membership. Verify that the already-open tab loses access on its next refresh and a fresh login is denied.
+
 - [ ] Cashfree production approval, bank details, approved domain and production webhook configured.
 - [ ] Sandbox webhook no longer targets service using live credentials.
 - [ ] PAYMENTS_MODE live matches CASHFREE_ENV production; fresh browser session.

@@ -9,6 +9,7 @@ Updated 16 November 2026. This is the operating procedure for the implemented re
 | Send assistance request | Supabase > Table Editor > public > assistance_requests | Duty coordinator | UUID, assigned owner, status and follow-up notes |
 | Call helpline / ambulance | `+91 75689 68704` | Person holding the NGO phone | Call answered and next action agreed |
 | Contact on WhatsApp | WhatsApp for the same number | Duty coordinator | Conversation assigned and followed up |
+| Mewar Connect enquiry form | Staff workspace → Requests, labelled with the chosen interest | Partnerships lead | Route asset leases to the property/equipment lead, hospital management and staff to recruitment, volunteers to the camp coordinator, and camp funding to finance. Track email or phone enquiries separately. |
 | Email / partnership / impact-report request | `houseofdoctorsngo@gmail.com` via visitor's mail app | NGO office / partnerships lead | Email received and reply tracked |
 | Donation | Cashfree Payment Gateway + Supabase donations | Finance lead | Verified payment, refund and settlement reconciliation |
 | Refund / uncertain debit question | Phone or email, with donation/order/payment reference | Finance lead | Provider record checked; decision and reference recorded |
@@ -16,6 +17,8 @@ Updated 16 November 2026. This is the operating procedure for the implemented re
 | View media | Public gallery | Media owner | Approved image/video, caption and consent record |
 
 A mailto click does not send an email automatically; the visitor must send it from their email app. WhatsApp is an external conversation, not a website live-chat bot. Neither channel automatically creates a Supabase row. No email/SMS alert delivery is currently implemented. Do not assume submission success has notified a phone.
+
+Mewar Connect's **Make a donation** link opens the regular donation section. Record a camp funding enquiry as correspondence until finance verifies a payment. The public checkout does not assign donations to individual camps.
 
 ## Assistance queue
 
@@ -82,6 +85,6 @@ Use [supabase/operations.sql](supabase/operations.sql) for read-only queue/finan
 | Technical owner | GitHub Actions, Railway deployment/logs, provider failures, updates and restore tests |
 | Media/content owner | Consent, captions, video transcripts, current service claims and official publications |
 
-Enable individually scoped provider access and MFA according to available plans. Supabase dashboard access is privileged: give it only to trusted operators. There is no website staff login or granular custom role system in this release. If the team outgrows direct dashboards, a separately designed authenticated staff portal and a consent-aware notification service are follow-up work, not hidden capabilities of this site.
+Staff sign in at `/staff` using accounts approved by the project owner. Requests includes the Help Desk and Mewar Connect queues. Select a status to save it. Donations shows transaction and settlement details. Realtime changes refresh the visible page automatically, with a 15-second refresh while the tab is active as a fallback. The panel's staff role can view both queues. Give access only to people authorised to see both donor and requester information. Finance continues to process refunds and settlements in Cashfree. Set up or revoke accounts using [FIRST_TIME_SETUP.md](FIRST_TIME_SETUP.md).
 
 Keep verified backups and perform a restore exercise on an isolated project before relying on them. Railway rollback restores application code, not deleted or changed database records. Keep credentials in provider settings/password management, never in Git, client code or support messages.

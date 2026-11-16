@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 vi.mock("../lib/api", () => ({
   api: async () => ({ paymentsMode: "disabled", assistanceEnabled: false, turnstileSiteKey: null }),
@@ -60,10 +60,40 @@ it("retains working policy anchors and opens supplemental sections from a hash",
   expect(document.getElementById("privacy")).toHaveAttribute("open");
   window.history.replaceState(null, "", "/#mewar-connect");
   fireEvent(window, new HashChangeEvent("hashchange"));
-  expect(screen.getByRole("button", { name: /Mewar Connect A bridge/ })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: /^Mewar Connect / })).toHaveAttribute(
     "aria-expanded",
     "true",
   );
   expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "#privacy");
+  await act(async () => {});
+});
+
+it("routes the three Mewar Connect groups and distinguishes funding enquiries from donations", async () => {
+  render(<HomePage />);
+  fireEvent.click(screen.getByRole("button", { name: /^Mewar Connect / }));
+  const section = within(document.getElementById("mewar-connect")!);
+  expect(section.getAllByRole("article")).toHaveLength(3);
+  for (const title of ["Asset partners", "Healthcare managers", "Medical staff"]) {
+    expect(section.getByRole("heading", { name: title })).toBeVisible();
+  }
+  for (const [name, topic] of [
+    ["Discuss an asset lease", "Asset lease"],
+    ["Enquire about management roles", "Hospital management"],
+    ["Enquire about hospital work", "Medical staff"],
+    ["Volunteer at a medical camp", "Camp volunteering"],
+    ["Discuss camp funding", "Camp funding"],
+  ] as const) {
+    fireEvent.click(section.getByRole("button", { name }));
+    const form = section.getByRole("region", { name: topic + " enquiry" });
+    expect(form.querySelector('[name="assistance_type"]')).toHaveValue(topic);
+    const url = new URL(
+      section.getByRole("link", { name: "email the partnerships team" }).getAttribute("href")!,
+    );
+    expect(url.protocol).toBe("mailto:");
+    expect(url.pathname).toBe("houseofdoctorsngo@gmail.com");
+    expect(url.searchParams.get("subject")).toBe("Mewar Connect - " + topic);
+  }
+  expect(section.getByRole("link", { name: "Make a donation" })).toHaveAttribute("href", "#donate");
+  expect(document.getElementById("donate")).toBeInTheDocument();
   await act(async () => {});
 });

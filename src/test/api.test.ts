@@ -4,6 +4,16 @@ import { handleApi } from '../server/api';
 
 afterEach(() => vi.unstubAllEnvs());
 describe('Public API configuration and failures', () => {
+  it('only returns a browser-safe key to the staff sign-in page', async () => {
+    vi.stubEnv('SUPABASE_URL', 'https://db.example');
+    const request = () => handleApi(new Request('https://ngo.example/api/staff/config'));
+    for (const key of ['sb_secret_wrong_slot', 'a.' + Buffer.from('{"role":"service_role"}').toString('base64url') + '.c']) {
+      vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', key);
+      expect((await request())?.status).toBe(503);
+    }
+    vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_qa');
+    expect(await (await request())?.json()).toEqual({ url: 'https://db.example', key: 'sb_publishable_qa' });
+  });
   it('supports a fresh project secret key without exposing it in public configuration', async () => {
     vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('SITE_URL', 'https://ngo.example');
     vi.stubEnv('SUPABASE_URL', 'https://db.example'); vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_private');

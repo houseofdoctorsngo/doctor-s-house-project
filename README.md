@@ -8,7 +8,7 @@ Doctor-led rural healthcare NGO website. A single React/TanStack Start landing r
 - Cashfree-hosted donations with deterministic orders, status recovery, signed webhooks and verified refunds.
 - Contact phone: **+91 75689 68704**; email: **houseofdoctorsngo@gmail.com**.
 - Published Lovable presentation restored, with the owner's five field photos and video in a 3D rotating gallery.
-- Private operations through Supabase and Cashfree dashboards. No website admin login, automatic email/SMS alerts or automatic official tax receipts.
+- Approved operators use the private staff workspace for requests and donation transactions. Account setup and payment reconciliation are covered in FIRST_TIME_SETUP.md and OPERATIONS.md.
 
 ## Start here
 

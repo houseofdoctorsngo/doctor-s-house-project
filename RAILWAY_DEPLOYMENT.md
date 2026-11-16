@@ -14,7 +14,7 @@ Updated 16 November 2026. Use [FIRST_TIME_SETUP.md](FIRST_TIME_SETUP.md) for the
 | Network | `HOST=0.0.0.0`; Railway-provided `PORT` |
 | Healthcheck | `/api/health` (liveness only) |
 | Canonical origin observed | `https://www.thehouseofdoctor.in` |
-| Database | Existing Supabase, `supabase/production.sql` |
+| Database | Existing Supabase, `supabase/production.sql` followed by `supabase/staff.sql` for the private workspace |
 | Bot protection | Existing Cloudflare Turnstile widget |
 | Payment provider | Cashfree hosted checkout, server verification, signed webhooks |
 

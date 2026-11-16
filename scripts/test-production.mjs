@@ -53,6 +53,13 @@ try {
   assert.equal(malformed.status, 400);
   const disabled = await fetch(`${origin}/api/payments/order`, { method: 'POST', headers: { Origin: 'https://ngo.example', 'Content-Type': 'application/json' }, body: '{}' });
   assert.equal(disabled.status, 503);
+  const staff = await fetch(`${origin}/staff`);
+  assert.equal(staff.status, 200);
+  const staffPage = await staff.text();
+  assert.match(staffPage, /Staff sign-in/);
+  assert.match(staffPage, /noindex/);
+  assert.doesNotMatch(staffPage, /Transaction \/ payment ID/);
+  assert.equal((await fetch(`${origin}/api/staff/config`)).status, 503);
   assert.equal((await fetch(`${origin}/missing-page`)).status, 404);
   console.log('PASS compiled API origin/JSON checks, disabled payments and 404 handling');
   console.log('Production runtime smoke test passed; no external provider requests were made.');

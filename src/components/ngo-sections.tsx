@@ -20,7 +20,6 @@ import {
   MapPin,
   Download,
   ExternalLink,
-  CheckCircle2,
   Baby,
   Activity,
   Building2,
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Gallery } from "./gallery";
+import { MewarConnect } from "./mewar-connect";
 import { assistanceSchema, assistanceTypes } from "@/lib/ngo";
 import { HelpDesk } from "./help-desk";
 const topics = [
@@ -219,85 +219,11 @@ export function NgoSections({
         )}
         <Segment
           id="mewar-connect"
-          icon={Ambulance}
+          icon={HeartHandshake}
           title="Mewar Connect"
-          subtitle="A bridge to advanced care · Corporate hospital partnerships"
+          subtitle="Asset partners, healthcare managers and medical staff"
         >
-          <p className="text-xs leading-6 text-muted-foreground">
-            A village diagnosis should never be the end of a patient's journey. Mewar Connect is our
-            strategic partnership initiative linking rural patients with tertiary corporate
-            healthcare. We bring trusted local relationships and free ambulance access; partner
-            hospitals bring advanced treatment. Together, we help eligible patients navigate
-            Ayushman Bharat and PMJAY, with continuity from first consultation to follow-up.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4 mt-4">
-            {[
-              {
-                title: "What We Bring",
-                list: [
-                  "On-ground trust and village outreach",
-                  "24×7 ambulance and patient coordination",
-                  "A connected patient referral pipeline",
-                  "Government scheme facilitation",
-                ],
-              },
-              {
-                title: "What Corporate Hospitals Bring",
-                list: [
-                  "Advanced diagnostics and specialist doctors",
-                  "Critical care and tertiary treatments",
-                  "Established clinical protocols",
-                  "Dedicated referral and discharge support",
-                ],
-              },
-            ].map((x) => (
-              <div key={x.title} className="bg-heal-soft rounded-xl p-5">
-                <h3 className="text-lg mb-3">{x.title}</h3>
-                <ul className="space-y-2">
-                  {x.list.map((s) => (
-                    <li key={s} className="flex gap-2 text-xs text-muted-foreground">
-                      <CheckCircle2 size={14} className="text-primary shrink-0" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-5">
-            {["Village", "Mewar Ambulance", "Corporate Hospital", "Follow-up Care"].map((s, i) => (
-              <div key={s} className="flex items-center gap-2 text-xs">
-                <span className="icon-badge font-semibold">0{i + 1}</span>
-                <span>{s}</span>
-                {i < 3 && <ArrowRight size={14} className="text-gold-deep shrink-0" />}
-              </div>
-            ))}
-          </div>
-          <div className="grid sm:grid-cols-2 gap-5 border-t pt-4">
-            <div>
-              <h3 className="text-base mb-2">The challenges we address</h3>
-              <p className="text-xs leading-6 text-muted-foreground">
-                Distance, delayed diagnosis, financial uncertainty, and complex scheme paperwork can
-                prevent patients from accessing timely treatment. Coordinated referrals and clear
-                communication reduce these barriers.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base mb-2">A win for patients, hospitals, and society</h3>
-              <p className="text-xs leading-6 text-muted-foreground">
-                Patients reach specialist care sooner. Hospitals receive coordinated referrals and
-                better clinical context. Communities benefit from stronger access, healthier
-                families, and consistent follow-up.
-              </p>
-            </div>
-          </div>
-          <Button asChild variant="mission" className="mt-5">
-            <a href="mailto:houseofdoctorsngo@gmail.com?subject=Mewar%20Connect%20Partnership">
-              <HeartHandshake />
-              Partner with Mewar Connect
-              <ArrowRight />
-            </a>
-          </Button>
+          <MewarConnect />
         </Segment>
         <Segment
           id="focus"
@@ -381,7 +307,7 @@ export function NgoSections({
               },
               {
                 title: "Mewar Connect Proposal",
-                text: "The partnership vision, referral journey, and shared outcomes.",
+                text: "Request details about asset leases, hospital management and medical roles.",
                 action: "Request proposal",
               },
               {
