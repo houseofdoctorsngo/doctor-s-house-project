@@ -1,6 +1,19 @@
 # Field photos and videos
 
-The gallery supports local images and videos with captions. Actual media has not yet been supplied for this release; the empty state stays honest rather than publishing invented camp photographs.
+On 16 November 2026, the owner supplied five photographs and one video and requested publication in Moments from the field. All six are included in `src/lib/gallery.ts`, with descriptive captions and direct thumbnail selection. Dates and locations have not been inferred from filenames.
+
+The photos are web-sized JPEG copies (maximum 1600px on the longer edge, no copied EXIF metadata). Original framing is retained. The supplied 30.85-second H.264 MP4 is included unchanged (about 9.3 MB), with a poster from its first second and a visual description. No spoken-audio transcript has been claimed. Original banners visible within the media may contain historical contact numbers; the site's current contact remains +91 75689 68704.
+
+| Supplied file | Website file |
+| --- | --- |
+| IMG-20261115-WA0041.jpg | public/images/camps/community-consultations.jpg |
+| IMG-20261115-WA0037.jpg | public/images/camps/village-health-camp.jpg |
+| IMG-20261115-WA0001.jpg | public/images/camps/care-under-the-banyan.jpg |
+| IMG-20261115-WA0040.jpg | public/images/camps/community-outreach.jpg |
+| Screenshot_20261115_164559_Instagram.jpg | public/images/camps/field-care-team.jpg |
+| VID-20261115-WA0033.mp4 | public/videos/camps/camp-day.mp4 |
+
+For future additions:
 
 1. Supply approved photos/videos, a short title, location/date if known, credit and permission to publish identifiable people. Do not publish patient records, identity documents or unapproved clinical details. Obtain the appropriate guardian permission for identifiable children.
 2. Optimise photos as JPG/WebP (roughly 1200-1800px wide). Remove unnecessary location metadata. Use descriptive filenames.

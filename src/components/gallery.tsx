@@ -72,8 +72,8 @@ export function Gallery() {
           <img
             src={photo.src}
             alt={photo.alt}
-            width={1200}
-            height={800}
+            width={photo.width ?? 1200}
+            height={photo.height ?? 800}
             loading="lazy"
             className="w-full max-h-96 object-contain"
           />
@@ -89,6 +89,39 @@ export function Gallery() {
           )}
         </figcaption>
       </figure>
+      <div
+        className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4"
+        aria-label="Choose a field moment"
+      >
+        {photos.map((item, index) => (
+          <button
+            key={item.src}
+            type="button"
+            aria-label={`Show ${item.title}`}
+            aria-pressed={active === index}
+            onClick={() => setActive(index)}
+            className={`relative overflow-hidden rounded-lg border-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current ${active === index ? "border-gold-deep" : "border-transparent"}`}
+          >
+            {item.kind !== "video" || item.poster ? (
+              <img
+                src={item.poster ?? item.src}
+                alt=""
+                loading="lazy"
+                width={160}
+                height={96}
+                className="w-full h-16 sm:h-20 object-cover"
+              />
+            ) : (
+              <span className="block h-16 sm:h-20 bg-heal-soft" />
+            )}
+            {item.kind === "video" && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/25 text-white">
+                <Play aria-hidden="true" fill="currentColor" size={24} />
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
       {photos.length > 1 && (
         <div className="flex gap-3 justify-center items-center mt-4">
           <Button

@@ -104,7 +104,7 @@ Interrupted orders retain a random access token in the same browser tab's sessio
 
 Read [OPERATIONS.md](OPERATIONS.md) for who reviews each channel, request filters, finance reconciliation and incident handling. There is no website `/admin` page and no automatic email/SMS alert integration; assign a dashboard-monitoring rota before enabling the form. Supabase and Cashfree dashboards are the private operator tools.
 
-Read [MEDIA_GUIDE.md](MEDIA_GUIDE.md) for approved photos/videos. The gallery has no fabricated field images. Real files and captions are still to be supplied. Annual reports and the partnership proposal remain email-request links until approved documents exist.
+Read [MEDIA_GUIDE.md](MEDIA_GUIDE.md) for the five owner-supplied field photos and video added on 16 November 2026, and for future media additions. Annual reports and the partnership proposal remain email-request links until approved documents exist.
 
 Enable Railway **Wait for CI** after the GitHub Actions workflow passes. Railway code rollback does not roll back database records. Stop conflicting Lovable publishing after cutover; never force-push connected Git history.
 

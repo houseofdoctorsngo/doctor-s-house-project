@@ -17,6 +17,10 @@ No real Cashfree payment, refund, bank settlement, real Turnstile submission or 
 
 ## Repeatable developer gate
 
+### Field media follow-up — 16 November 2026
+
+Five owner-supplied photos and one 30.85-second H.264 video were added after the initial Cashfree release. TypeScript, the three gallery component tests and the production build passed. In the compiled local browser preview, all gallery images loaded, thumbnail selection worked, the video played with native controls (`paused=false`, `readyState=4`, duration about 30.87 seconds), and selecting a photo removed the player. A 390px mobile viewport showed no horizontal overflow and a two-row thumbnail layout. The video has a visual description; spoken-audio transcription and caption accuracy were not verified.
+
 ```sh
 npm run typecheck
 npm test
