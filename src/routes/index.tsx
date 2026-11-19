@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomePage } from "@/components/home-page";
+import { organisation } from "../lib/organisation";
 const siteUrl = (import.meta.env["VITE_SITE_URL"] || "https://www.thehouseofdoctor.in").replace(
   /\/$/,
   "",
@@ -16,8 +17,8 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { property: "og:url", content: siteUrl },
-      { property: "og:image", content: siteUrl + "/images/ngo-logo.jpeg" },
-      { name: "twitter:image", content: siteUrl + "/images/ngo-logo.jpeg" },
+      { property: "og:image", content: siteUrl + "/images/ngo-logo.png" },
+      { name: "twitter:image", content: siteUrl + "/images/ngo-logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
@@ -32,12 +33,14 @@ export const Route = createFileRoute("/")({
           name: "The House of Doctor",
           url: siteUrl,
           description,
-          foundingDate: "2023",
+          foundingDate: "2024",
           telephone: "+91 75689 68704",
-          email: "houseofdoctorsngo@gmail.com",
-          slogan: "Healing communities, restoring hope.",
+          email: [organisation.email, organisation.otherEmail],
+          logo: siteUrl + "/images/ngo-logo.png",
+          slogan: "Your health our responsibility",
           address: {
             "@type": "PostalAddress",
+            streetAddress: "2nd floor, above Ajanta Book Distributors, New Bhopalpura",
             addressLocality: "Udaipur",
             addressRegion: "Rajasthan",
             addressCountry: "IN",

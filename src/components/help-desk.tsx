@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { HumanVerification } from "./human-verification";
 import { assistanceSchema, assistanceTypes, type MewarTopic } from "@/lib/ngo";
 import { api, type PublicConfig } from "@/lib/api";
+import { organisation } from "../lib/organisation";
 
 export function HelpDesk({ enquiry }: { enquiry?: MewarTopic }) {
   const [config, setConfig] = useState<PublicConfig | null>(null);
@@ -83,20 +84,26 @@ export function HelpDesk({ enquiry }: { enquiry?: MewarTopic }) {
               </span>
               <ArrowRight size={17} className="ml-auto" />
             </a>
+            {[organisation.email, organisation.otherEmail].map((email) => (
+              <a
+                key={email}
+                href={"mailto:" + email}
+                className="card-3d flex items-center gap-4 rounded-2xl p-5"
+              >
+                <span className="icon-badge">
+                  <Mail />
+                </span>
+                <span>
+                  <span className="block text-xs uppercase text-muted-foreground">Email Us</span>
+                  <span className="font-semibold break-all">{email}</span>
+                </span>
+              </a>
+            ))}
             <a
-              href="mailto:houseofdoctorsngo@gmail.com"
-              className="card-3d flex items-center gap-4 rounded-2xl p-5"
-            >
-              <span className="icon-badge">
-                <Mail />
-              </span>
-              <span>
-                <span className="block text-xs uppercase text-muted-foreground">Email Us</span>
-                <span className="font-semibold break-all">houseofdoctorsngo@gmail.com</span>
-              </span>
-            </a>
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Udaipur%2C%20Rajasthan%2C%20India"
+              href={
+                "https://www.google.com/maps/search/?api=1&query=" +
+                encodeURIComponent(organisation.address)
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="card-3d flex items-center gap-4 rounded-2xl p-5"
@@ -106,7 +113,7 @@ export function HelpDesk({ enquiry }: { enquiry?: MewarTopic }) {
               </span>
               <span>
                 <span className="block text-xs uppercase text-muted-foreground">Location</span>
-                <span className="font-semibold">Udaipur, Rajasthan, India</span>
+                <span className="font-semibold">{organisation.address}</span>
               </span>
               <ExternalLink size={14} />
             </a>

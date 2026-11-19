@@ -30,6 +30,13 @@ export const paymentsSchema = z.array(
     payment_amount: z.number(),
     payment_currency: z.string(),
     payment_status: z.string(),
+    payment_time: z.string().datetime({ offset: true }).nullish(),
+    payment_completion_time: z.string().datetime({ offset: true }).nullish(),
+    payment_group: z.string().max(80).nullish(),
+    bank_reference: z
+      .union([z.string().max(200), z.number()])
+      .nullish()
+      .transform((value) => (value == null ? null : String(value))),
     is_captured: z.boolean().optional(),
     authorization: z
       .object({ action: z.string(), status: z.string(), captured_amount: z.number().optional() })

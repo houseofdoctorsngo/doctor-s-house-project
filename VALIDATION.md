@@ -1,6 +1,14 @@
 # Release validation and owner acceptance
 
-Updated 16 November 2026. This supersedes prior Razorpay test counts and temporary-branch instructions. Follow FIRST_TIME_SETUP.md before checking remote providers.
+Updated 19 November 2026. Follow FIRST_TIME_SETUP.md before checking remote providers.
+
+## Finishing update — 19 November 2026
+
+The donation section now follows About and combines amount selection with donor details. The website uses the corrected high-resolution logo, both email addresses, the New Bhopalpura office address and the 2024 founding year.
+
+Receipt tests cover verified live payments, pending and failed attempts, incorrect amounts, missing access tokens and refreshed refund totals. Production smoke validation generates a PDF using the compiled server module and embedded logo/fonts. The sample receipt was rendered and checked for page overflow. The browser preview confirmed custom amount selection and the styled Mewar Connect enquiry buttons.
+
+Preview [the sample receipt](public/sample-donation-receipt.pdf) without making a payment. Recreate it with `node scripts/sample-receipt.mjs`. The sample uses illustrative donor and transaction details. No real payment was made during these checks.
 
 ## Lovable presentation restoration, 16 November 2026
 
@@ -55,7 +63,7 @@ Run with Node 22.23.4+ and the locked npm dependencies. GitHub Actions additiona
 | --- | --- |
 | Successful payment | Cashfree PAID order + SUCCESS captured payment; exact amount/currency/order; one matching Supabase row, provider cashfree, mode test |
 | Fake browser success | No paid status without provider verification |
-| Cancel / failed attempt | Pending/uncertain guidance; no paid acknowledgement |
+| Cancel / failed attempt | Pending/uncertain guidance; receipt endpoint rejects the download |
 | Pending/preauthorised payment | No Resume invitation until safe; no claimed payment receipt |
 | Reload / lost order response | Same-tab Check payment status recovers the existing order/session |
 | Creation timeout | Persisted deterministic order; Retry this order uses same UUID idempotency key after verification |
@@ -72,7 +80,7 @@ Run with Node 22.23.4+ and the locked npm dependencies. GitHub Actions additiona
 | Paused donations | PAYMENTS_MODE disabled prevents new checkout, retains status/webhooks with unchanged credentials |
 | Test/live switch | Old test references blocked under production credentials, test rows preserved |
 | Legacy Razorpay row | Not processed through Cashfree; staff contact guidance |
-| Download | TEST PAYMENT - NO MONEY RECEIVED acknowledgement, correct reference/amount/refund; not official tax receipt |
+| Download | Sandbox PDF labelled TEST PAYMENT - NO MONEY RECEIVED; live receipt shows logo, donor details, amount, date, transaction and order IDs, and verified refunds |
 
 Do these with real sandbox credentials after automated checks. Check webhook logs and SQL evidence, not only the checkout screen. Retain order IDs and test outcomes privately, without secrets or patient data.
 
@@ -99,7 +107,7 @@ Do these with real sandbox credentials after automated checks. Check webhook log
 - [ ] Sandbox webhook no longer targets service using live credentials.
 - [ ] PAYMENTS_MODE live matches CASHFREE_ENV production; fresh browser session.
 - [ ] Authorised owner makes a small real donation; website, Supabase and Cashfree agree.
-- [ ] Finance reconciles bank settlement/fees, records settled_at/reference, and issues official receipt under NGO procedure.
+- [ ] Finance reconciles bank settlement/fees, records settled_at/reference, and matches the downloaded donation receipt to the provider transaction.
 - [ ] Duty/finance/office backups assigned; daily reconciliation and unresolved-request review operating.
 - [ ] Provider dispute deadlines, webhook failures, Railway errors and backup/restore procedure owned.
 - [ ] GitHub Actions and Railway deployment succeeded for the pushed main commit; enable Wait for CI.

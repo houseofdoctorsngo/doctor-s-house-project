@@ -2,6 +2,7 @@ import { Building2, BriefcaseBusiness, Stethoscope } from "lucide-react";
 import { useState } from "react";
 import { HelpDesk } from "./help-desk";
 import type { MewarTopic } from "../lib/ngo";
+import { Button } from "./ui/button";
 
 const opportunities = [
   {
@@ -38,7 +39,7 @@ function enquiryLink(topic: string) {
   );
 }
 
-const linkStyle = "text-sm font-semibold text-primary underline underline-offset-4";
+const buttonStyle = "h-auto min-h-11 whitespace-normal rounded-xl px-4 py-3 text-center leading-5";
 
 export function MewarConnect() {
   const [topic, setTopic] = useState<MewarTopic | undefined>();
@@ -63,14 +64,15 @@ export function MewarConnect() {
             <p className="my-3 text-sm leading-6">{description}</p>
             <div className="mt-auto flex flex-col items-start gap-3 pt-2">
               {enquiries.map(([label, topic]) => (
-                <button
+                <Button
+                  variant="mission"
                   key={topic}
                   type="button"
                   onClick={() => choose(topic)}
-                  className={linkStyle}
+                  className={buttonStyle + " w-full"}
                 >
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
           </article>
@@ -79,12 +81,17 @@ export function MewarConnect() {
       <div className="mt-5 border-t pt-4">
         <h3 className="text-base">Want to help fund a camp?</h3>
         <div className="mt-2 flex flex-wrap gap-x-6 gap-y-3">
-          <button type="button" onClick={() => choose("Camp funding")} className={linkStyle}>
+          <Button
+            variant="heal"
+            type="button"
+            onClick={() => choose("Camp funding")}
+            className={buttonStyle}
+          >
             Discuss camp funding
-          </button>
-          <a href="#donate" className={linkStyle}>
-            Make a donation
-          </a>
+          </Button>
+          <Button asChild variant="mission" className={buttonStyle}>
+            <a href="#donate">Make a donation</a>
+          </Button>
         </div>
       </div>
       {topic && (

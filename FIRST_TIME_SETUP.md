@@ -84,7 +84,7 @@ Leave `PORT` to Railway and `NODE_ENV=production` / `HOST=0.0.0.0` to the Docker
 9. Set `PAYMENTS_MODE=test` and deploy. `/api/config` must show `test`, and the page must show a test-mode notice.
 10. Make a sandbox checkout using Cashfree's current official test methods. Confirm the same `order_id` in Cashfree and Supabase, `provider=cashfree`, `mode=test`, `status=captured` and the expected amount in paise (INR x 100).
 11. Confirm successful webhook delivery in Cashfree Logs. Test cancellation, failed/pending payment, refresh, retry, refund and duplicate webhook cases in [VALIDATION.md](VALIDATION.md).
-12. A downloaded acknowledgement must say **TEST PAYMENT - NO MONEY RECEIVED**. It is not an official donation receipt or tax certificate.
+12. A sandbox receipt must say **TEST PAYMENT - NO MONEY RECEIVED**. Confirm the donor details, amount, transaction ID and refunds. A live verified payment offers the official donation receipt.
 
 Checkout uses Cashfree-hosted payment fields. The website does not collect card details or UPI PINs. A browser success message cannot mark a donation paid: the server checks Cashfree and updates Supabase.
 
@@ -97,7 +97,7 @@ Interrupted orders retain a random access token in the same browser tab's sessio
 3. Replace both Cashfree credentials with the production pair and set `CASHFREE_ENV=production`. Configure the production webhook at the final www endpoint with the same event selections.
 4. Disable the sandbox webhook to this production deployment or send it to a separate staging deployment that retains sandbox credentials. One deployed service uses one environment at a time; old test references cannot be verified with live credentials.
 5. Set `PAYMENTS_MODE=live` and deploy. Check `/api/config`, then have the authorised owner make a small real donation and reconcile provider success, Supabase, webhook delivery and bank settlement.
-6. Record `settled_at` and `settlement_reference` only after finance verifies the actual settlement. Issue and record the official receipt using your approved accounting process. No automatic 80G certificate is implemented.
+6. Record `settled_at` and `settlement_reference` after finance verifies the actual settlement. The website issues a donation receipt after server verification of the successful payment. It uses the stable number `THD-CF-<Cashfree payment ID>`. Handle any tax documentation through the NGO finance process.
 7. To pause new donations later, change **only** `PAYMENTS_MODE=disabled`; retain Cashfree environment/keys and Supabase keys so existing status checks and webhooks still work.
 
 ## 7. Daily operation and media

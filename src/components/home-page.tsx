@@ -11,7 +11,7 @@ import {
   ReferenceServices,
   ReferenceFooter,
 } from "@/components/reference-sections";
-const logo = "/images/ngo-logo.jpeg";
+const logo = "/images/ngo-logo.png";
 const navigation = [
   ["Home", "home"],
   ["About", "about"],
@@ -86,7 +86,7 @@ export function HomePage() {
                 The House of Doctor
               </span>
               <span className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:block">
-                Udaipur • Since 2023
+                Udaipur • Since 2024
               </span>
             </span>
           </a>
@@ -149,6 +149,7 @@ export function HomePage() {
       <main id="main">
         <ReferenceHero />
         <ReferenceAbout />
+        <Donation />
         <ReferenceServices />
         <section
           id="gallery"
@@ -174,7 +175,6 @@ export function HomePage() {
             <HelpDesk />
           </div>
         </section>
-        <Donation />
         <NgoSections open={open} setOpen={setOpen} supplemental />
         <Policies />
       </main>

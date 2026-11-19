@@ -1,5 +1,6 @@
 // Presentation and wording transcribed from the published Lovable site on 16 November 2026.
 // See docs/REFERENCE_RESTORATION.md for sources and deliberate operational differences.
+import { organisation } from "../lib/organisation";
 export function ReferenceHero() {
   return (
     <section className="hero-bg relative overflow-hidden" id="home">
@@ -12,7 +13,7 @@ export function ReferenceHero() {
             <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-br from-[var(--gold)]/25 via-heal-soft to-accent/20 blur-2xl"></div>
             <div className="rounded-[2rem] bg-white p-4 shadow-[var(--shadow-3d)] ring-1 ring-[var(--gold)]/40 sm:p-5">
               <img
-                src="/images/ngo-logo.jpeg"
+                src="/images/ngo-logo.png"
                 alt="The House of Doctor — official logo"
                 className="logo-float block h-52 w-auto rounded-2xl object-contain sm:h-64 md:h-72"
               />
@@ -36,7 +37,7 @@ export function ReferenceHero() {
                 <path d="M22 4h-4"></path>
                 <circle cx="4" cy="20" r="2"></circle>
               </svg>
-              {" Est. 2023"}
+              {" Est. 2024"}
             </span>
           </div>
           <span className="mt-8 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-xs font-semibold text-primary shadow-[var(--shadow-inset-3d)]">
@@ -292,16 +293,15 @@ export function ReferenceFooter() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3">
               <img
-                src="/images/ngo-logo.jpeg"
+                src="/images/ngo-logo.png"
                 alt="The House of Doctor"
                 className="h-11 w-11 rounded-xl object-cover shadow-[var(--shadow-inset-3d)]"
               />
               <span className="font-display text-lg font-semibold">{"The House of Doctor"}</span>
             </div>
-            <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              {
-                "Healing communities, restoring hope. Serving tribal villages around Udaipur since 2023."
-              }
+            <p className="mt-4 text-base font-medium">Your health our responsibility</p>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+              Healing communities, restoring hope since 2024
             </p>
             <div className="mt-5 flex gap-3"></div>
           </div>
@@ -325,7 +325,17 @@ export function ReferenceFooter() {
                   <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
-                {"Udaipur, Rajasthan, India"}
+                <a
+                  href={
+                    "https://www.google.com/maps/search/?api=1&query=" +
+                    encodeURIComponent(organisation.address)
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary"
+                >
+                  {organisation.address}
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <svg
@@ -344,12 +354,17 @@ export function ReferenceFooter() {
                   <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
                   <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 </svg>
-                <a
-                  href="mailto:houseofdoctorsngo@gmail.com"
-                  className="hover:text-primary break-all"
-                >
-                  {"houseofdoctorsngo@gmail.com"}
-                </a>
+                <div className="min-w-0 space-y-2">
+                  {[organisation.email, organisation.otherEmail].map((email) => (
+                    <a
+                      key={email}
+                      href={"mailto:" + email}
+                      className="block hover:text-primary break-all"
+                    >
+                      {email}
+                    </a>
+                  ))}
+                </div>
               </li>
               <li className="flex items-center gap-2">
                 <svg

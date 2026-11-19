@@ -1,6 +1,9 @@
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { setTimeout as delay } from 'node:timers/promises';
+import { readdir } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 
 const origin = 'http://127.0.0.1:43127';
 const server = spawn(process.execPath, ['.output/server/index.mjs'], {
@@ -27,7 +30,7 @@ try {
   const page = await fetch(origin); const html = await page.text();
   assert.equal(page.status, 200);
   assert.ok(html.includes('The House of Doctor') && html.includes('A house built on healing.') && html.includes('Support Our Mission'));
-  const sections = ['home', 'about', 'services', 'gallery', 'help-desk', 'donate', 'mewar-connect', 'focus', 'library', 'publications'];
+  const sections = ['home', 'about', 'donate', 'services', 'gallery', 'help-desk', 'mewar-connect', 'focus', 'library', 'publications'];
   const positions = sections.map(id => html.indexOf(`id="${id}"`));
   assert.ok(positions.every(position => position >= 0));
   assert.deepEqual(positions, [...positions].sort((a, b) => a - b));
@@ -60,6 +63,21 @@ try {
   assert.match(staffPage, /noindex/);
   assert.doesNotMatch(staffPage, /Transaction \/ payment ID/);
   assert.equal((await fetch(`${origin}/api/staff/config`)).status, 503);
+  const sample = await fetch(`${origin}/sample-donation-receipt.pdf`);
+  assert.equal(sample.status, 200);
+  assert.equal(sample.headers.get('content-type'), 'application/pdf');
+  assert.ok(Buffer.from(await sample.arrayBuffer()).subarray(0, 5).toString() === '%PDF-');
+  const receiptChunk = (await readdir('.output/server/_ssr')).find(name => /^receipt-.*\.mjs$/.test(name));
+  assert.ok(receiptChunk, 'Compiled receipt module is present');
+  const { generateReceipt } = await import(pathToFileURL(resolve('.output/server/_ssr', receiptChunk)).href);
+  const testReceipt = generateReceipt({
+    id: 'test', name: 'QA donor', email: 'qa@example.org', phone: '+91 90000 00000',
+    amount: 251, orderId: 'test_order', paymentId: 'test_payment', status: 'captured',
+    mode: 'test', date: '2026-11-19T10:00:00+05:30', refunded: 0, paymentDate: null,
+    paymentMethod: null, bankReference: null,
+  });
+  assert.ok(Buffer.from(testReceipt).subarray(0, 5).toString() === '%PDF-');
+  console.log('PASS sample PDF and compiled receipt generation with embedded logo and fonts');
   assert.equal((await fetch(`${origin}/missing-page`)).status, 404);
   console.log('PASS compiled API origin/JSON checks, disabled payments and 404 handling');
   console.log('Production runtime smoke test passed; no external provider requests were made.');

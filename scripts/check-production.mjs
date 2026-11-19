@@ -29,5 +29,7 @@ await check('/staff', async response => {
   if (!html.includes('Staff sign-in') || !html.includes('noindex')) throw new Error('Missing staff sign-in page');
 });
 await check('/images/ngo-logo.jpeg', async response => { if (!response.headers.get('content-type')?.startsWith('image/')) throw new Error('Logo is not an image'); });
+await check('/images/ngo-logo.png', async response => { if (response.headers.get('content-type') !== 'image/png') throw new Error('Updated logo missing'); });
+await check('/sample-donation-receipt.pdf', async response => { if (response.headers.get('content-type') !== 'application/pdf') throw new Error('Sample receipt missing'); });
 if (failed) process.exitCode = 1;
 else console.log('Read-only smoke checks passed. Provider integration tests are still required.');

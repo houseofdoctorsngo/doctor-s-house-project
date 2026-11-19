@@ -161,7 +161,7 @@ export function NgoSections({
             <div className="grid lg:grid-cols-[1.15fr_1fr] gap-6">
               <div>
                 <p className="text-xs text-muted-foreground leading-7">
-                  Since 2023, The House of Doctor has brought a simple belief to life:{" "}
+                  Since 2024, The House of Doctor has brought a simple belief to life:{" "}
                   <strong className="text-primary font-medium">
                     quality healthcare is a right, not a privilege.
                   </strong>{" "}

@@ -188,43 +188,25 @@ export function Donation() {
     }
   }
   async function download() {
-    const result = await check();
-    if (!result || !["captured", "partially_refunded", "refunded"].includes(result.status)) return;
-    const { jsPDF } = await import("jspdf");
-    const pdf = new jsPDF();
-    pdf.setFontSize(22);
-    pdf.text("The House of Doctor", 20, 25);
-    pdf.setFontSize(14);
-    pdf.text(
-      result.mode === "test" ? "TEST PAYMENT - NO MONEY RECEIVED" : "Payment acknowledgement",
-      20,
-      40,
-    );
-    pdf.setFontSize(10);
-    const lines = [
-      "Udaipur, Rajasthan | +91 75689 68704",
-      "houseofdoctorsngo@gmail.com",
-      "",
-      `Reference: ${result.id}`,
-      `Order: ${result.orderId}`,
-      `Payment: ${result.paymentId}`,
-      `Donor: ${result.name}`,
-      `Amount: INR ${result.amount.toLocaleString("en-IN")}`,
-      `Status: ${result.status}`,
-      `Refunded: INR ${result.refunded.toLocaleString("en-IN")}`,
-      `Order date: ${new Date(result.date).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}`,
-      "",
-      "This is not an official donation receipt, settlement confirmation or tax certificate.",
-      "Contact the NGO for an official receipt after settlement and reconciliation.",
-      "No 80G eligibility or tax deduction is asserted by this acknowledgement.",
-    ];
-    let y = 54;
-    for (const line of lines) {
-      const wrapped = pdf.splitTextToSize(line, 170);
-      pdf.text(wrapped, 20, y);
-      y += wrapped.length * 6 + 3;
+    if (!pending) return;
+    const response = await fetch("/api/payments/receipt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: pending.id, token: pending.token }),
+      signal: AbortSignal.timeout(45000),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Receipt download failed. Please try again.");
     }
-    pdf.save(`THD-${result.id}-acknowledgement.pdf`);
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "THD-" + pending.id + "-receipt.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
     <section id="donate" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
@@ -236,75 +218,42 @@ export function Donation() {
           reach one more village.
         </p>
       </div>
-      <div className="mt-12 grid gap-8 lg:grid-cols-2">
+      <div className="mx-auto mt-10 max-w-2xl">
         <div className="card-3d rounded-3xl p-6 sm:p-8">
-          <h3 className="text-xl mb-4">Choose an amount</h3>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[...donationPresets, "Custom"].map((value) => (
-              <Button
-                key={value}
-                variant="choice"
-                disabled={!!pending || busy}
-                aria-pressed={preset === value}
-                onClick={() => setPreset(value)}
-              >
-                {typeof value === "number" ? formatINR(value) : value}
-              </Button>
-            ))}
-          </div>
-          {preset === "Custom" && (
-            <label className="block mt-3">
-              <span className="field-label">Custom amount (INR)</span>
-              <input
-                className="field"
-                type="number"
-                min="1"
-                max="10000000"
-                step="1"
-                disabled={!!pending || busy}
-                value={custom}
-                onChange={(event) => setCustom(event.target.value)}
-                required
-              />
-            </label>
-          )}
-          <h3 className="mt-8 text-lg font-semibold">Payment method</h3>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {[
-              { name: "Card", sub: "Credit / Debit" },
-              { name: "UPI", sub: "GPay / PhonePe" },
-              { name: "Bank", sub: "Netbanking" },
-            ].map((method) => (
-              <div
-                key={method.name}
-                className="rounded-xl border-2 border-border bg-card px-3 py-4 text-center"
-              >
-                <div className="text-sm font-semibold">{method.name}</div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{method.sub}</div>
+          {!pending && (
+            <>
+              <h3 className="text-xl mb-4">Choose an amount</h3>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[...donationPresets, "Custom"].map((value) => (
+                  <Button
+                    key={value}
+                    variant="choice"
+                    disabled={!!pending || busy}
+                    aria-pressed={preset === value}
+                    onClick={() => setPreset(value)}
+                  >
+                    {typeof value === "number" ? formatINR(value) : value}
+                  </Button>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="bg-heal-soft rounded-xl p-4 mt-5 text-sm leading-7">
-            <ShieldCheck className="mb-2" />
-            <p>
-              Choose UPI, card or netbanking in Cashfree checkout, subject to provider availability.
-              Card details and UPI PINs are entered only with the payment provider.
-            </p>
-          </div>
-          <p className="text-xs leading-6 mt-4">
-            For other payment arrangements,{" "}
-            <a href="tel:+917568968704" className="underline">
-              contact our team
-            </a>
-            . Please verify the recipient before transferring funds.
-          </p>
-          <p className="text-xs mt-3">
-            <a href="#refunds" className="underline">
-              Donation questions and refunds
-            </a>
-          </p>
-        </div>
-        <div className="card-3d rounded-3xl p-6 sm:p-8">
+              {preset === "Custom" && (
+                <label className="block mt-3">
+                  <span className="field-label">Custom amount (INR)</span>
+                  <input
+                    className="field"
+                    type="number"
+                    min="1"
+                    max="10000000"
+                    step="1"
+                    disabled={!!pending || busy}
+                    value={custom}
+                    onChange={(event) => setCustom(event.target.value)}
+                    required
+                  />
+                </label>
+              )}
+            </>
+          )}
           {config?.paymentsMode === "test" && (
             <p role="status" className="bg-heal-soft p-3 rounded-lg text-sm mb-4">
               Test mode — no real donation is collected.
@@ -312,7 +261,7 @@ export function Donation() {
           )}
           {pending ? (
             <div className="space-y-4">
-              <CheckCircle2 />
+              {confirmation && confirmation.status !== "pending" && <CheckCircle2 />}
               <h3 className="text-xl">
                 {confirmation && confirmation.status !== "pending"
                   ? confirmation.mode === "test"
@@ -320,11 +269,21 @@ export function Donation() {
                     : "Payment verified"
                   : "Your donation checkout"}
               </h3>
+              {confirmation?.status === "captured" && confirmation.mode === "live" && (
+                <p className="rounded-xl bg-heal-soft p-4 text-base leading-7">
+                  Thank you, {confirmation.name}, for your donation. Your support helps us bring
+                  healthcare to our communities. Your official donation receipt is ready to
+                  download.
+                </p>
+              )}
               <p className="text-xs break-all">Reference: {pending.id}</p>
               {confirmation && (
                 <dl className="text-sm space-y-2">
                   <div>Amount: {formatINR(confirmation.amount)}</div>
                   <div>Status: {confirmation.status.replaceAll("_", " ")}</div>
+                  {confirmation.paymentId && (
+                    <div className="break-all">Transaction ID: {confirmation.paymentId}</div>
+                  )}
                   {confirmation.refunded > 0 && (
                     <div>Refunded: {formatINR(confirmation.refunded)}</div>
                   )}
@@ -371,11 +330,10 @@ export function Donation() {
                     onClick={() => action(download)}
                   >
                     <Download />
-                    Download acknowledgement
+                    Download donation receipt
                   </Button>
                   <p className="text-xs leading-6">
-                    This is not an official donation receipt or tax certificate. Contact the NGO
-                    after settlement for an official receipt.
+                    Your receipt includes the verified amount, transaction ID and donor details.
                   </p>
                   <Button
                     variant="ghost"
@@ -412,7 +370,7 @@ export function Donation() {
             </div>
           ) : (
             <form onSubmit={submit}>
-              <h3 className="text-xl mb-4">Payment Details</h3>
+              <h3 className="text-xl mt-8 mb-4">Your details</h3>
               <div className="mt-5 grid gap-4">
                 <label>
                   <span className="field-label">Full name</span>
@@ -488,6 +446,17 @@ export function Donation() {
                 {busy ? "Opening checkout…" : `Donate ${formatINR(amount || 0)}`}
                 <ArrowRight className="ml-auto" />
               </Button>
+              <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <ShieldCheck size={16} /> Secure payment through Cashfree
+              </p>
+              <a
+                href="/sample-donation-receipt.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 block text-center text-xs underline underline-offset-4"
+              >
+                View a sample donation receipt
+              </a>
               {config?.paymentsMode === "disabled" && (
                 <p className="text-xs leading-6 mt-3">
                   Online donations are not enabled yet. No payment is taken here. Call our team for

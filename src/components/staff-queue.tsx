@@ -127,6 +127,12 @@ function DonationCard({ row }: { row: DonationRow }) {
           ["Settlement reference", row.settlement_reference],
           ["Settled", date(row.settled_at)],
           ["Receipt reference", row.receipt_reference],
+          [
+            "Website receipt number",
+            row.provider === "cashfree" && row.payment_id && row.status !== "pending"
+              ? "THD-CF-" + row.payment_id
+              : null,
+          ],
           ["Email", row.email],
           ["Phone", row.phone],
           ["Staff notes", row.staff_notes],

@@ -256,7 +256,16 @@ async function paymentState(row: DonationRow, order: CashfreeOrder) {
           mode: row.mode,
         }
       : null;
-  return { ...summary(row), checkout, awaitingCapture, orderStatus: order.order_status };
+  return {
+    ...summary(row),
+    checkout,
+    awaitingCapture,
+    orderStatus: order.order_status,
+    paymentDate: paid?.payment_completion_time || paid?.payment_time || null,
+    paymentMethod: paid?.payment_group || null,
+    bankReference: paid?.bank_reference || null,
+    paymentConfirmed: !!paid,
+  };
 }
 function summary(row: DonationRow) {
   return {
@@ -300,10 +309,14 @@ export async function handleApi(request: Request): Promise<Response | null> {
       let publicKey = /^sb_publishable_[A-Za-z0-9_-]+$/.test(key);
       if (!publicKey && key.split(".").length === 3) {
         try {
-          publicKey = JSON.parse(Buffer.from(key.split(".")[1]!, "base64url").toString()).role === "anon";
-        } catch { /* Unrecognised keys stay server-side. */ }
+          publicKey =
+            JSON.parse(Buffer.from(key.split(".")[1]!, "base64url").toString()).role === "anon";
+        } catch {
+          /* Unrecognised keys stay server-side. */
+        }
       }
-      if (!url || !publicKey || key === secretKey()) return json({ error: "Staff sign-in awaits Supabase setup." }, 503);
+      if (!url || !publicKey || key === secretKey())
+        return json({ error: "Staff sign-in awaits Supabase setup." }, 503);
       return json({ url, key });
     }
     if (path === "/api/config" && request.method === "GET")
@@ -506,6 +519,37 @@ export async function handleApi(request: Request): Promise<Response | null> {
         throw new ApiError(503, "New checkout attempts are paused.");
       await checkHuman(parsed.humanToken, "donation");
       return json(await paymentState(row, await ensureOrder(row)));
+    }
+    if (path === "/api/payments/receipt") {
+      const parsed = accessSchema.parse(body);
+      const row = await donationFor(parsed.id, parsed.token);
+      requirePaymentMode(row);
+      const order = await readOrder(row);
+      if (!order)
+        throw new ApiError(
+          409,
+          "Payment is not confirmed yet. Check its status before downloading a receipt.",
+        );
+      const verified = await paymentState(row, order);
+      if (
+        !verified.paymentConfirmed ||
+        !verified.paymentId ||
+        !["captured", "partially_refunded", "refunded"].includes(verified.status)
+      )
+        throw new ApiError(
+          409,
+          "Payment is not confirmed yet. Check its status before downloading a receipt.",
+        );
+      const { generateReceipt } = await import("./receipt");
+      const bytes = generateReceipt({ ...verified, email: row.email, phone: row.phone });
+      return new Response(bytes, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="THD-' + row.id + '-receipt.pdf"',
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
     }
     if (path === "/api/payments/verify" || path === "/api/payments/status") {
       const parsed = accessSchema.parse(body);

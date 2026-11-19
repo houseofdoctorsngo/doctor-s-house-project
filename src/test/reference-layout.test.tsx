@@ -17,16 +17,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-it("renders the reference section order once, with retained details below donations", async () => {
+it("renders donations directly after About and each main section once", async () => {
   const { container } = render(<HomePage />);
   const ids = [...container.querySelectorAll("main [id]")].map((element) => element.id);
   const order = [
     "home",
     "about",
+    "donate",
     "services",
     "gallery",
     "help-desk",
-    "donate",
     "mewar-connect",
     "focus",
     "library",

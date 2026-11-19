@@ -4,7 +4,9 @@ const mocks = vi.hoisted(() => ({
   row: {} as Record<string, unknown>,
   rpc: vi.fn(),
   insert: vi.fn(),
+  receipt: vi.fn(() => new TextEncoder().encode("%PDF-1.3 test").buffer),
 }));
+vi.mock("../server/receipt", () => ({ generateReceipt: mocks.receipt }));
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
     from: () => {
@@ -57,6 +59,7 @@ function provider(payments: unknown[] = [], changes = {}, refunds: unknown[] = [
   return mock;
 }
 beforeEach(() => {
+  mocks.receipt.mockClear();
   vi.stubEnv("SITE_URL", "https://ngo.example");
   vi.stubEnv("SUPABASE_URL", "https://db.example");
   vi.stubEnv("SUPABASE_SECRET_KEY", "server-only");
@@ -81,23 +84,83 @@ beforeEach(() => {
     payment_id: null,
     amount_refunded: 0,
   };
-  mocks.rpc
-    .mockReset()
-    .mockImplementation(async (_name, args) => ({
-      data: {
-        ...mocks.row,
-        status: args.refunded_paise ? "partially_refunded" : "captured",
-        payment_id: args.provider_payment_id,
-        amount_refunded: args.refunded_paise,
-      },
-      error: null,
-    }));
+  mocks.rpc.mockReset().mockImplementation(async (_name, args) => ({
+    data: {
+      ...mocks.row,
+      status: args.refunded_paise ? "partially_refunded" : "captured",
+      payment_id: args.provider_payment_id,
+      amount_refunded: args.refunded_paise,
+    },
+    error: null,
+  }));
 });
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
 describe("Cashfree verification and recovery", () => {
+  it("creates a receipt from verified records and ignores forged donor and amount fields", async () => {
+    mocks.row["mode"] = "live";
+    vi.stubEnv("CASHFREE_ENV", "production");
+    provider(
+      [
+        {
+          ...payment,
+          payment_time: "2026-11-19T10:02:00+05:30",
+          payment_group: "upi",
+          bank_reference: "bank_123",
+        },
+      ],
+      { order_status: "PAID" },
+    );
+    const response = await handleApi(request("receipt", { name: "Forged", amount: 999999 }));
+    expect(response?.status).toBe(200);
+    expect(response?.headers.get("content-type")).toBe("application/pdf");
+    expect(response?.headers.get("cache-control")).toBe("no-store");
+    expect(mocks.receipt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Test Donor",
+        email: "test@example.org",
+        phone: "9876543210",
+        amount: 1000,
+        paymentId: "12345",
+        status: "captured",
+        mode: "live",
+        bankReference: "bank_123",
+        paymentDate: "2026-11-19T10:02:00+05:30",
+      }),
+    );
+  });
+  it.each(["PENDING", "FAILED"])(
+    "withholds receipts for %s payments despite a browser success claim",
+    async (status) => {
+      provider([{ ...payment, payment_status: status }]);
+      expect((await handleApi(request("receipt", { status: "captured" })))?.status).toBe(409);
+      expect(mocks.receipt).not.toHaveBeenCalled();
+    },
+  );
+  it("withholds receipts without the donation secret or when provider amounts differ", async () => {
+    expect((await handleApi(request("receipt", { token: "" })))?.status).toBe(400);
+    provider([{ ...payment, payment_amount: 1 }], { order_status: "PAID" });
+    expect((await handleApi(request("receipt")))?.status).toBe(400);
+    expect(mocks.receipt).not.toHaveBeenCalled();
+  });
+  it("refreshes refund totals before issuing the receipt", async () => {
+    provider([payment], { order_status: "PAID" }, [
+      {
+        cf_refund_id: "refund_1",
+        cf_payment_id: "12345",
+        order_id: order.order_id,
+        refund_amount: 100,
+        refund_currency: "INR",
+        refund_status: "SUCCESS",
+      },
+    ]);
+    expect((await handleApi(request("receipt")))?.status).toBe(200);
+    expect(mocks.receipt).toHaveBeenCalledWith(
+      expect.objectContaining({ refunded: 100, status: "partially_refunded" }),
+    );
+  });
   it("saves the deterministic reference before a timed-out provider call", async () => {
     mocks.row = null as unknown as Record<string, unknown>;
     mocks.insert.mockImplementation((value) => {

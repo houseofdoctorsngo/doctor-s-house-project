@@ -41,7 +41,7 @@ flowchart TD
 | Refunds | Successful refund records fetched from provider and deduplicated; pending refunds do not reduce income; old events cannot undo refunds; no automatic refund creation |
 | Operations | Supabase Table Editor and Cashfree dashboard; private assignment/follow-up/settlement/receipt fields; no custom staff web login or outbound notification service |
 | Assets | NGO logo is local; gallery is an explicit manifest supporting image/video/poster/captions/transcript; no field files supplied yet |
-| Documents | Health guide generated in browser; reports/proposals requested by email; acknowledgement only after provider verification, never an automatic tax receipt |
+| Documents | Health guide generated in browser; reports/proposals requested by email; branded donation receipt generated on the server after provider verification |
 | CI | Typecheck, tests, advisory scan, production build/smoke and added Linux Docker build; main must be gated with Railway Wait for CI |
 
 The complete repository inventory is in [docs/CODEBASE_INVENTORY.md](docs/CODEBASE_INVENTORY.md). Domain-specific runtime, schema and deployment paths were traced in detail. Generic unused shadcn components were inventoried/static-scanned, not individually exercised as product features. Generated output, local credentials and dependency source are not project-owned feature code.
@@ -86,7 +86,7 @@ The legacy site should not continue collecting enquiries or displaying old conta
 | Drawer and footer section buttons | Controlled accordion opening; Health Library navigation checked at mobile width; dialog closes correctly |
 | Donation presets / Custom | State selection with INR amount; custom numeric validation; no payment can start without configured provider/verification/consent |
 | Check status / Resume / Retry this order | Authenticated server verification and same-order recovery; tested with mocked gateway responses and browser component tests |
-| Download acknowledgement | Rechecks provider before generating PDF; official receipt/settlement claims explicitly excluded |
+| Download donation receipt | Authenticates the donor session and rechecks payment/refunds before generating the branded PDF |
 | Clear checkout | Requires a clear warning about debits/uncertain results; cannot cancel a provider payment |
 | Call / WhatsApp / email / map | Correct new phone and established email/location links inspected; no calls/messages were sent |
 | Partnership / report request | Opens an email draft with subject; requires visitor to send and NGO office to monitor mailbox |
