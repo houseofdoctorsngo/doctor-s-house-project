@@ -7,6 +7,12 @@ export function validSignature(body: string, signature: string, secret: string) 
   return timingSafeEqual(expected, Buffer.from(signature, 'hex'));
 }
 
+export function validCashfreeSignature(body: string, timestamp: string, signature: string, secret: string) {
+  if (!/^\d{10,16}$/.test(timestamp) || !/^[A-Za-z0-9+/]{43}=$/.test(signature) || !secret) return false;
+  const expected = createHmac('sha256', secret).update(timestamp + body).digest();
+  return timingSafeEqual(expected, Buffer.from(signature, 'base64'));
+}
+
 export function sameOrigin(request: Request, siteUrl: string) {
   const origin = request.headers.get('origin');
   return origin !== null && origin === new URL(siteUrl).origin;

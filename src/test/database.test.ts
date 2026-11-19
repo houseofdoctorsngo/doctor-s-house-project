@@ -74,6 +74,15 @@ describe('Database permissions and validation', () => {
 });
 
 describe('Payment persistence', () => {
+  it('preserves legacy donations when the schema is reapplied', async () => {
+    const id = randomUUID();
+    await db.query("INSERT INTO donations(id,token_hash,name,email,phone,amount_paise,mode,order_id) VALUES($1,$2,'Legacy','legacy@example.org','9876543228',10000,'test','legacy_order')", [id, 'b'.repeat(64)]);
+    await db.exec(await readFile(new URL('../../supabase/production.sql', import.meta.url), 'utf8'));
+    const result = await db.query('SELECT provider,amount_paise FROM donations WHERE id=$1', [id]);
+    expect(result.rows[0]).toEqual({ provider: 'razorpay', amount_paise: 10000 });
+    await db.query("UPDATE donations SET provider='cashfree', staff_notes='QA only', settlement_reference='test-reference', receipt_reference='test-receipt' WHERE id=$1", [id]);
+    await expect(asRole('anon', 'SELECT staff_notes FROM donations')).rejects.toThrow(/permission denied/);
+  });
   it('rejects public payment writes and handles repeat/out-of-order refunds monotonically', async () => {
     const id = randomUUID();
     await asRole('service_role', "INSERT INTO donations(id,token_hash,name,email,phone,amount_paise,mode,order_id) VALUES($1,$2,'Test Donor','donor@example.org','9876543220',100000,'test','order_test')", [id, 'a'.repeat(64)]);

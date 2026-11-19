@@ -4,6 +4,16 @@ import { handleApi } from '../server/api';
 
 afterEach(() => vi.unstubAllEnvs());
 describe('Public API configuration and failures', () => {
+  it('only returns a browser-safe key to the staff sign-in page', async () => {
+    vi.stubEnv('SUPABASE_URL', 'https://db.example');
+    const request = () => handleApi(new Request('https://ngo.example/api/staff/config'));
+    for (const key of ['sb_secret_wrong_slot', 'a.' + Buffer.from('{"role":"service_role"}').toString('base64url') + '.c']) {
+      vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', key);
+      expect((await request())?.status).toBe(503);
+    }
+    vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_qa');
+    expect(await (await request())?.json()).toEqual({ url: 'https://db.example', key: 'sb_publishable_qa' });
+  });
   it('supports a fresh project secret key without exposing it in public configuration', async () => {
     vi.stubEnv('NODE_ENV', 'production'); vi.stubEnv('SITE_URL', 'https://ngo.example');
     vi.stubEnv('SUPABASE_URL', 'https://db.example'); vi.stubEnv('SUPABASE_SECRET_KEY', 'sb_secret_private');
@@ -25,11 +35,11 @@ describe('Public API configuration and failures', () => {
     expect(response?.status).toBe(200);
   });
   it('does not enable live payments with test credentials', async () => {
-    vi.stubEnv('PAYMENTS_MODE', 'live'); vi.stubEnv('RAZORPAY_KEY_ID', 'rzp_test_example');
+    vi.stubEnv('PAYMENTS_MODE', 'live'); vi.stubEnv('CASHFREE_ENV', 'sandbox');
     const response = await handleApi(new Request('https://ngo.example/api/config'));
     const data = await response?.json();
     expect(data.paymentsMode).toBe('disabled');
-    expect(JSON.stringify(data)).not.toContain('rzp_test_example');
+    expect(JSON.stringify(data)).not.toHaveProperty('CASHFREE_SECRET_KEY');
   });
   it('rejects untrusted origins before accessing database', async () => {
     vi.stubEnv('SITE_URL', 'https://ngo.example');
@@ -37,7 +47,7 @@ describe('Public API configuration and failures', () => {
     expect(response?.status).toBe(403);
   });
   it('rejects unsigned webhook events', async () => {
-    vi.stubEnv('RAZORPAY_WEBHOOK_SECRET', 'test-secret');
+    vi.stubEnv('CASHFREE_SECRET_KEY', 'test-secret'); vi.stubEnv('CASHFREE_APP_ID', 'test-app'); vi.stubEnv('CASHFREE_ENV', 'sandbox');
     const response = await handleApi(new Request('https://ngo.example/api/payments/webhook', { method: 'POST', body: '{}' }));
     expect(response?.status).toBe(401);
   });

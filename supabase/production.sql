@@ -14,6 +14,11 @@ ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS status text NOT 
 ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS staff_notes text;
 -- Do not backfill consent timestamps for historical records.
 ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS consent_at timestamptz;
+ALTER TABLE public.assistance_requests DROP CONSTRAINT IF EXISTS assistance_requests_assistance_type_check;
+ALTER TABLE public.assistance_requests ADD CONSTRAINT assistance_requests_assistance_type_check CHECK (assistance_type IN ('Free camp','Medicines','Doctor consultation','Ambulance','Government schemes','Patient support','Other','Asset lease','Hospital management','Medical staff','Camp volunteering','Camp funding'));
+ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS assigned_to text;
+ALTER TABLE public.assistance_requests ADD COLUMN IF NOT EXISTS follow_up_at timestamptz;
+CREATE INDEX IF NOT EXISTS assistance_queue_idx ON public.assistance_requests(status, follow_up_at, created_at);
 ALTER TABLE public.assistance_requests ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.assistance_requests FROM anon, authenticated;
 GRANT INSERT (id, name, phone, village, assistance_type, submission_token) ON public.assistance_requests TO anon, authenticated;
@@ -73,6 +78,12 @@ CREATE TABLE IF NOT EXISTS public.donations (
   verified_at timestamptz
 );
 ALTER TABLE public.donations ENABLE ROW LEVEL SECURITY;
+-- Preserve legacy rows as Razorpay. New application inserts explicitly name Cashfree.
+ALTER TABLE public.donations ADD COLUMN IF NOT EXISTS provider text NOT NULL DEFAULT 'razorpay' CHECK (provider IN ('razorpay','cashfree'));
+ALTER TABLE public.donations ADD COLUMN IF NOT EXISTS staff_notes text;
+ALTER TABLE public.donations ADD COLUMN IF NOT EXISTS settlement_reference text;
+ALTER TABLE public.donations ADD COLUMN IF NOT EXISTS settled_at timestamptz;
+ALTER TABLE public.donations ADD COLUMN IF NOT EXISTS receipt_reference text;
 REVOKE ALL ON public.donations FROM anon, authenticated;
 GRANT ALL ON public.donations TO service_role;
 CREATE INDEX IF NOT EXISTS donations_phone_created_idx ON public.donations(phone, created_at);

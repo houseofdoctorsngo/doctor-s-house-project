@@ -12,7 +12,7 @@ Act as an expert web developer and UI/UX designer. Build a complete, production-
 
 - Motto: "Quality healthcare is a right, not a privilege."
 
-- Run by well-qualified doctors, operational for 2+ years (Est. 2023). Flagship rural hospital: Mewar Health Centre.
+- Run by well-qualified doctors, operational for 2+ years (Est. 2024). Flagship rural hospital: Mewar Health Centre.
 
 - Mission: help suffering patients in rural and periphery villages across Mewar with free medical camps, free medicines, free prescriptions, and a 24├ù7 free ambulance. Facilitate government health schemes (Ayushman Bharat, PMJAY).
 
@@ -36,7 +36,7 @@ The logo features a navy blue outline, mint green background, and a coral red cr
 
 - `--destructive`: coral red cross (oklch Γëê 0.68 0.19 25)
 
-- Premium Gold Accents: `--gold` and `--gold-deep` for gold gradient headings (`gold-text`), gold rings around the logo and gallery frame, and an "Est. 2023" gold badge.
+- Premium Gold Accents: `--gold` and `--gold-deep` for gold gradient headings (`gold-text`), gold rings around the logo and gallery frame, and an "Est. 2024" gold badge.
 
 - Gradients: `--gradient-hero` (mint ΓåÆ light blue ΓåÆ mint), `--gradient-primary` (navy), `--gradient-coral`, `--gradient-gold`.
 
@@ -76,7 +76,7 @@ The logo features a navy blue outline, mint green background, and a coral red cr
 
   - Left: Badge "≡ƒ¢í Doctor-led NGO ΓÇó Udaipur ΓÇó 2+ years"; h1 "The House of Doctor" with "House of Doctor" in gold gradient text; motto in navy; concise mission summary; two pill CTA buttons ("Request Assistance" ΓåÆ Help Desk, "Support Our Mission" ΓåÆ Donate); 3-metric strip in frosted cards: "2+ yrs Serving", "24├ù7 Ambulance", "100% Free care".
 
-  - Right: Logo displayed inside a white rounded frame with a gold ring, 3D shadow, smooth float animation, and a gold badge pinned to the top-right ("Γ£¿ Est. 2023").
+  - Right: Logo displayed inside a white rounded frame with a gold ring, 3D shadow, smooth float animation, and a gold badge pinned to the top-right ("Γ£¿ Est. 2024").
 
 
 

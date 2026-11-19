@@ -26,7 +26,7 @@ BEGIN
         RAISE EXCEPTION 'Missing permitted input: % for %', col, actor;
       END IF;
     END LOOP;
-    FOREACH col IN ARRAY ARRAY['status','staff_notes','created_at','consent_at'] LOOP
+    FOREACH col IN ARRAY ARRAY['status','staff_notes','created_at','consent_at','assigned_to','follow_up_at'] LOOP
       IF has_column_privilege(actor, 'public.assistance_requests', col, 'INSERT') THEN
         RAISE EXCEPTION 'Visitor can set protected field: % for %', col, actor;
       END IF;
@@ -38,6 +38,11 @@ BEGIN
   IF NOT has_function_privilege('service_role', 'public.record_verified_payment(uuid,text,integer)', 'EXECUTE') THEN
     RAISE EXCEPTION 'Missing payment server permission';
   END IF;
+  FOREACH col IN ARRAY ARRAY['provider','staff_notes','settlement_reference','settled_at','receipt_reference'] LOOP
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='donations' AND column_name=col) THEN
+      RAISE EXCEPTION 'Missing donation operations column: %', col;
+    END IF;
+  END LOOP;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.assistance_requests'::regclass AND tgname='validate_assistance_submission' AND tgenabled IN ('O','A')) THEN
     RAISE EXCEPTION 'Assistance verification trigger missing or disabled';
   END IF;
